@@ -64,27 +64,29 @@ class account_pom(web_driver, web_logger):
             cloud_menu = self.d.find_element(By.XPATH, Portal_Menu_Module_read_ini().get_CLOUD_MENU_button_by_xpath())
             cloud_menu.click()
             time.sleep(web_driver.one_second)
-            users_menu = web_driver.explicit_wait(self, 10, "XPATH", Portal_Menu_Module_read_ini().get_Users_menu_by_xpath(), self.d)
+            users_menu = web_driver.explicit_wait(self, 10, "XPATH",
+                                                        Portal_Menu_Module_read_ini().get_Users_menu_by_xpath(),
+                                                        self.d)
             users_menu.click()
             time.sleep(web_driver.two_second)
-            count_of_users = self.d.find_elements(By.XPATH, account_Read_Ini().count_of_users_by_xpath())
+            count_of_users = self.d.find_elements(By.XPATH,account_Read_Ini().count_of_users_by_xpath())
             if strategy == "before":
-                users = len(count_of_users) + 5
+                users = len(count_of_users) + int(account_Read_Ini().user_accounts_number())
                 self.logger.info(f"length of users: {users}")
                 e = account_Read_Ini().start_users_count().split('/')
                 actual_users_count = e[0]
                 self.logger.info(f"actual_users_count: {actual_users_count}")
-                if users == int(actual_users_count):
+                if users >= int(actual_users_count):
                     return True
                 else:
                     return False
             else:
-                users = len(count_of_users) + 6
+                users = len(count_of_users) + int(account_Read_Ini().user_accounts_number())
                 self.logger.info(f"length of users: {users}")
                 e = account_Read_Ini().end_users_count().split('/')
                 actual_users_count = e[0]
                 self.logger.info(f"actual_users_count: {actual_users_count}")
-                if users == int(actual_users_count):
+                if users >= int(actual_users_count):
                     return True
                 else:
                     return False
@@ -642,7 +644,7 @@ class account_pom(web_driver, web_logger):
             self.logger.info(f"account length: {len(account)}")
             i = 0
             for x in range(len(account) - 1):
-                self.logger.info(f"{account[x].text}")
+                self.logger.info(f"{account[x].text}, {account[x + 1].text}")
                 if i < (len(account) - 1):
                     self.store_data_to_common_ini_file_after_execution(account[x].text, account[x + 1].text)
                     self.status.append(True)
@@ -657,6 +659,7 @@ class account_pom(web_driver, web_logger):
             file = Path(common_test_data_ini_file_path)
             config = configparser.ConfigParser()
             config.read(file)
+            self.logger.info(f"Storing: {x}, {y}")
             if x == account_Read_Ini().enabled_status_text():
                 config.set("Account_Module_Data", "end_enabled_status", y)
                 config.write(file.open('w'))

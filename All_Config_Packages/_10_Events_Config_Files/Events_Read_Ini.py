@@ -1408,16 +1408,10 @@ class events_Read_Ini:
         except Exception as ex:
             print(ex.args)
 
+
     def read_total_number_of_events(self):
         try:
-            total = self.common_test_data_config.get("Events_Data", "Total_number_of_events_count")
-            return total
-        except Exception as ex:
-            print(ex.args)
-
-    def read_total_number_of_events_by_org(self):
-        try:
-            total = self.common_test_data_config.get("Events_Data", "Total_number_of_events_count_by_org")
+            total = self.config.get("data", "Total_number_of_events_count")
             return total
         except Exception as ex:
             print(ex.args)
@@ -1431,16 +1425,8 @@ class events_Read_Ini:
 
     def five_events_from_each_group(self):
         try:
-            five_events = self.common_test_data_config.get("Events_Data", "five_events_from_each_group")
+            five_events = self.config.get("data", "five_events_from_each_group")
             return five_events
-        except Exception as ex:
-            print(ex.args)
-
-    def five_events_from_each_group_and_org(self):
-        try:
-            five_events_from_each_group_and_org = self.common_test_data_config.get("Events_Data",
-                                                                                   "five_events_from_each_group_and_org")
-            return five_events_from_each_group_and_org
         except Exception as ex:
             print(ex.args)
 
@@ -1448,13 +1434,6 @@ class events_Read_Ini:
         try:
             enrollment_group_filter = self.config.get("events_locators", "enrollment_group_filter")
             return enrollment_group_filter
-        except Exception as ex:
-            print(ex.args)
-
-    def no_events_messageToUser(self):
-        try:
-            no_events_messageToUser = self.config.get("events_locators", "no_events_messageToUser")
-            return no_events_messageToUser
         except Exception as ex:
             print(ex.args)
 

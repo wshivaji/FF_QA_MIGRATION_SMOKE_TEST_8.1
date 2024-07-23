@@ -125,27 +125,25 @@ class user_roles_module_pom(web_driver, web_logger):
                                                              .get_user_role_menu_item_by_xpath(), self.d)
             actual_user_roles_menu_item.click()
             time.sleep(web_driver.one_second)
-            self.explicit_wait(10, "XPATH", user_roles_read_ini().user_role_name_list_by_xpath(), self.d)
-            actual_user_roles_menu_item_list = self.d.find_elements(By.XPATH, user_roles_read_ini().user_role_name_list_by_xpath())
-            actual_user_roles_description_list = self.d.find_elements(By.XPATH, user_roles_read_ini().user_role_description_list_by_xpath())
-            user_role_details_button = self.d.find_elements(By.XPATH, user_roles_read_ini().user_role_details_button_by_xpath())
+            actual_user_roles_menu_item_list = self.d.find_elements(By.XPATH, user_roles_read_ini().
+                                                                    user_role_name_list_by_xpath())
+            actual_user_roles_description_list = self.d.find_elements(By.XPATH, user_roles_read_ini().
+                                                                      user_role_description_list_by_xpath())
+            user_role_details_button = self.d.find_elements(By.XPATH, user_roles_read_ini().
+                                                            user_role_details_button_by_xpath())
 
             x = user_roles_read_ini().expected_user_role_list()
             expected_user_roles_list = x.split(',')
             time.sleep(web_driver.one_second)
-            j = 0
-            for i in actual_user_roles_menu_item_list:
-                self.logger.info(f"{i.text}, j = {j}")
-                for name in expected_user_roles_list:
-                    if name in i.text:
-                        self.logger.info(f"{i.text} user role is visible.")
-                        self.logger.info(f"Description: {i.text} ")
-                        time.sleep(web_driver.one_second)
-                        user_role_details_button[j].click()
-                        status.append(True)
-                    # else:
-                    #     status.append(False)
-                j += 1
+            for i in range(len(actual_user_roles_menu_item_list)):
+                if expected_user_roles_list[i] in actual_user_roles_menu_item_list[i].text:
+                    self.logger.info(f"{actual_user_roles_menu_item_list[i].text} user role is visible.")
+                    self.logger.info(f"Description: {actual_user_roles_description_list[i].text} ")
+                    time.sleep(web_driver.one_second)
+                    user_role_details_button[i].click()
+                    status.append(True)
+                else:
+                    status.append(False)
 
             self.logger.info(f"status: {status}")
             self.logger.info("TC_UR_01 execution completed.\n")
@@ -174,13 +172,11 @@ class user_roles_module_pom(web_driver, web_logger):
             actual_user_roles_menu_item.click()
             time.sleep(web_driver.one_second)
 
-            actual_count_of_user_roles = self.d.find_element(By.XPATH, user_roles_read_ini().total_number_of_user_roles_by_xpath()).text
-            actual_count_of_user_roles_list = actual_count_of_user_roles.split(' ')
-            self.logger.info(f"list: {actual_count_of_user_roles_list}")
+            actual_count_of_user_roles = self.d.find_element(By.XPATH, user_roles_read_ini().total_number_of_user_roles_by_xpath())
             user_role_count = f"{user_roles_read_ini().total_number_of_user_roles()} of {user_roles_read_ini().total_number_of_user_roles()}"
             self.logger.info(f"Expected count: Displaying {user_role_count} total user roles")
-            if int(user_roles_read_ini().total_number_of_user_roles()) <= int(actual_count_of_user_roles_list[3]):
-                self.logger.info(f"Actual count: {actual_count_of_user_roles_list[3]}")
+            if user_role_count in actual_count_of_user_roles.text:
+                self.logger.info(f"Actual count: {actual_count_of_user_roles.text}")
                 status.append(True)
             else:
                 status.append(False)

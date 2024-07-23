@@ -2097,7 +2097,7 @@ class events_pom(web_driver, web_logger):
 
     def Verify_25_events_are_generated_for_25_enrolled_subjects(self):
         try:
-            self.logger.info("*************************** Events testcases TC_001 started ****************************")
+            self.logger.info("*************************** Events testcases TC_001 started *******************************")
             self.status.clear()
             login().login_to_cloud_if_not_done(self.d)
             self.status.clear()
@@ -2114,14 +2114,14 @@ class events_pom(web_driver, web_logger):
             time.sleep(web_driver.one_second)
 
             displaying_total_number = self.d.find_element(By.XPATH,events_Read_Ini().total_number_of_events_happened_out_of_total_number_of_events())
-            self.logger.info(f"Total number of events are actual: {displaying_total_number.text}")
-            number_of_events_list = displaying_total_number.text.split(" ")
+            self.logger.info(f"Total number of events are : {displaying_total_number.text}")
+            number_of_events = displaying_total_number.text
             time.sleep(web_driver.one_second)
 
             Total_number = events_Read_Ini().read_total_number_of_events()
-            self.logger.info(f"Total number of events are Expected: {Total_number}")
+            self.logger.info(f"Total number of events are {Total_number}")
 
-            if int(Total_number) >= int(number_of_events_list[3]):
+            if Total_number in number_of_events:
                 self.logger.info("number of total events are 25")
                 self.status.append(True)
 
@@ -2163,11 +2163,10 @@ class events_pom(web_driver, web_logger):
                 # self.enrollment_group_search_result_validation()
                 Total_events_count_of_each_group = self.explicit_wait(5, "XPATH", events_Read_Ini().Events_count_each_eg(), self.d)
                 self.logger.info(f"Total number of events on each group is {Total_events_count_of_each_group.text}")
-                Total_events_count_of_each_group_list = Total_events_count_of_each_group.text.split(' ')
                 time.sleep(web_driver.one_second)
                 expected_events_counts = events_Read_Ini().five_events_from_each_group()
-                if int(expected_events_counts) >= int(Total_events_count_of_each_group_list[3]):
-                    self.logger.info(f"Displaying {int(Total_events_count_of_each_group_list[3])} events from each group")
+                if expected_events_counts in Total_events_count_of_each_group.text:
+                    self.logger.info("Displaying 5 events from each group")
                     self.status.append(True)
 
                 else:
@@ -2218,11 +2217,10 @@ class events_pom(web_driver, web_logger):
             # self.enrollment_group_search_result_validation()
             Total_events_count_of_each_group = self.explicit_wait(5, "XPATH", events_Read_Ini().Events_count_each_eg(), self.d)
             self.logger.info(f"Total number of events on each group is {Total_events_count_of_each_group.text}")
-            Total_events_count_of_each_group_list = Total_events_count_of_each_group.text.split(' ')
             time.sleep(web_driver.one_second)
             expected_events_counts = events_Read_Ini().read_total_number_of_events()
-            if int(expected_events_counts) >= int(Total_events_count_of_each_group_list[3]):
-                self.logger.info("Displaying < or = 25 events")
+            if expected_events_counts in Total_events_count_of_each_group.text:
+                self.logger.info("Displaying 25 events")
                 self.status.append(True)
             else:
                 self.status.append(False)
@@ -2259,12 +2257,12 @@ class events_pom(web_driver, web_logger):
                 self.click_on_save_button()
                 self.click_on_event_filter_search_button()
                 # self.enrollment_group_search_result_validation()
-                Total_events_count_of_each_group = self.explicit_wait(5, "XPATH", events_Read_Ini().Events_count_each_eg(), self.d)
-                Total_events_count_of_each_group_list = Total_events_count_of_each_group.text.split(' ')
+                Total_events_count_of_each_group = self.explicit_wait(5, "XPATH",
+                                                                      events_Read_Ini().Events_count_each_eg(), self.d)
                 self.logger.info(f"Total number of events on each group is {Total_events_count_of_each_group.text}")
                 time.sleep(web_driver.one_second)
                 expected_events_counts = events_Read_Ini().five_events_from_each_group()
-                if int(expected_events_counts) >= int(Total_events_count_of_each_group_list[3]):
+                if expected_events_counts in Total_events_count_of_each_group.text:
                     self.logger.info("Displaying 5 events from each group")
                     self.status.append(True)
 
@@ -2292,7 +2290,7 @@ class events_pom(web_driver, web_logger):
             login().login_to_cloud_if_not_done(self.d)
             x = events_Read_Ini().get_enrollment_group()
             enrollment_group_list = x.split(',')
-            self.logger.info(f"enrollment group list is :{enrollment_group_list}")
+            self.logger.info(f"enrollment group list is: {enrollment_group_list}")
             for i in range(len(enrollment_group_list)):
                 self.click_on_event_menu()
                 self.click_on_search_button()
@@ -2310,19 +2308,19 @@ class events_pom(web_driver, web_logger):
                 self.logger.info(f"Total number of events on each group is {Total_events_count_of_each_group.text}")
                 time.sleep(web_driver.one_second)
                 expected_events_counts = events_Read_Ini().five_events_from_each_group()
-
-                self.logger.info("Displaying events from each group")
-                self.status.append(True)
-                self.click_on_select_all_checkbox()
-                self.click_on_action_dropdown()
-                self.click_on_edit_tags_option_inside_action_dropdown()
-                self.status.append(self.verify_probable_match_event_tags_panel_displayed())
-                self.click_on_filter_dropdown_on_event_tags_panel()
-                self.click_on_unlinked_tags_option_inside_filter_dropdown()
-                # self.verify_all_Tags_available()
-                self.select_tags_to_add_to_events(eg_name)
-                self.click_action_dropdown_on_event_tags_panel()
-                self.click_on_add_tags_to_selected_events_option_1()
+                if expected_events_counts in Total_events_count_of_each_group.text:
+                    self.logger.info("Displaying 5 events from each group")
+                    self.status.append(True)
+                    self.click_on_select_all_checkbox()
+                    self.click_on_action_dropdown()
+                    self.click_on_edit_tags_option_inside_action_dropdown()
+                    self.status.append(self.verify_probable_match_event_tags_panel_displayed())
+                    self.click_on_filter_dropdown_on_event_tags_panel()
+                    self.click_on_unlinked_tags_option_inside_filter_dropdown()
+                    # self.verify_all_Tags_available()
+                    self.select_tags_to_add_to_events(eg_name)
+                    self.click_action_dropdown_on_event_tags_panel()
+                    self.click_on_add_tags_to_selected_events_option_1()
 
                 # else:
                 #     self.status.append(False)
@@ -3146,9 +3144,9 @@ class events_pom(web_driver, web_logger):
 
     def click_on_event_filter_search_button(self):
         time.sleep(web_driver.one_second)
+        self.explicit_wait(10, "XPATH", events_Read_Ini().event_filter_search_button_by_xpath(), self.d)
         click_on_event_filter_search_button = self.d.find_element(By.XPATH,
-                                                                  events_Read_Ini().
-                                                                  event_filter_search_button_by_xpath())
+                                                                  events_Read_Ini().event_filter_search_button_by_xpath())
         click_on_event_filter_search_button.click()
         # wait_icon = self.d.find_element(By.XPATH, events_Read_Ini().wait_icon_xpath())
 

@@ -81,6 +81,7 @@ class Portal_Login_Page_Pom(web_driver, web_logger):
             self.logger.info("verify_user_login_with_valid_credentials_and_click_on_cloud_login_and_verify_it_is_navigating_to_cloud_menu_panel")
 
             self.load_portal_login_page_if_not_loaded()
+            login().accept_terms_and_conditions_for_login_for_new_user(self.d)
             time.sleep(web_driver.one_second)
             self.status.clear()
             time.sleep(web_driver.one_second)
@@ -100,6 +101,7 @@ class Portal_Login_Page_Pom(web_driver, web_logger):
                 click()
             self.logger.info("Clicked on CLOUD LOGIN button....")
             time.sleep(web_driver.two_second)
+            login().accept_terms_and_conditions_for_login_for_new_user(self.d)
             time.sleep(web_driver.one_second)
             if self.explicit_wait(10, "XPATH", Portal_login_page_read_ini()
                     .get_cloud_menu_on_dashboard_by_xpath(), self.d).is_displayed():
@@ -435,7 +437,7 @@ class Portal_Login_Page_Pom(web_driver, web_logger):
                 self.d.get(Portal_login_page_read_ini().get_portal_url())
                 self.d.maximize_window()
                 time.sleep(web_driver.one_second)
-                for i in range(4):
+                for i in range(5):
                     pyautogui.hotkey('ctrl', '-')
                     time.sleep(0.5)
 

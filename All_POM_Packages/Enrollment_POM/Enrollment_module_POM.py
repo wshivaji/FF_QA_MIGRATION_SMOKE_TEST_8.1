@@ -23,7 +23,7 @@ class enrollments_POM(web_driver, web_logger):
     status = []
 
     now = (datetime.datetime.now())
-    DATE_IE = now.strftime('%d/%m/%Y')
+    DATE_IE = now.strftime('%m/%d/%Y')
     TIME_IE = now.strftime('%H%M')
     AM_PM_IE = now.strftime('%p')
 
@@ -1650,6 +1650,7 @@ class enrollments_POM(web_driver, web_logger):
                 return False
         finally:
             Identify_And_Enroll_POM().click_on_logout_button()
+
 
     def verify_user_able_to_see_disabled_status_for_masked_enrollment(self):
         try:

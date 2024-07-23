@@ -387,16 +387,16 @@ class Visitor_Search_Jobs_Module_pom(web_driver, web_logger):
                                                        visitor_search_jobs_panel_search_button(), self.d)
             search_dropdown.click()
             time.sleep(web_driver.one_second)
-            date = int(Read_Visitor_Search_Components().meta_data_start_date())
-            month = str(Read_Visitor_Search_Components().meta_data_start_month())
-            year = int(Read_Visitor_Search_Components().meta_data_start_year())
+            date = int(Read_Visitor_Search_Components().get_start_date())
+            month = str(Read_Visitor_Search_Components().get_start_month())
+            year = int(Read_Visitor_Search_Components().get_start_year())
             hour = str(Read_Visitor_Search_jobs_Components().meta_data_start_hour())
             minute = Read_Visitor_Search_jobs_Components().meta_data_start_minuet()
             period = str(Read_Visitor_Search_jobs_Components().meta_data_start_am_pm_period())
 
-            e_month = str(Read_Visitor_Search_Components().meta_data_end_month())
-            e_date = int(Read_Visitor_Search_Components().meta_data_end_date())
-            e_year = int(Read_Visitor_Search_Components().meta_data_end_year())
+            e_month = str(Read_Visitor_Search_Components().get_end_month())
+            e_date = int(Read_Visitor_Search_Components().get_end_date())
+            e_year = int(Read_Visitor_Search_Components().get_end_year())
             e_hour = str(Read_Visitor_Search_jobs_Components().meta_data_end_hour())
             e_minute = Read_Visitor_Search_jobs_Components().meta_data_end_minuet()
             e_period = str(Read_Visitor_Search_jobs_Components().meta_data_end_am_pm_period())
@@ -509,17 +509,17 @@ class Visitor_Search_Jobs_Module_pom(web_driver, web_logger):
                                                 search_button_on_search_dialog_by_xpath())
             search_button.click()
             time.sleep(web_driver.one_second)
-            # job_checkbox = web_driver.explicit_wait(self, 10, "XPATH",
-            #                                         Read_Visitor_Search_jobs_Components().VSJ_checkbox_by_xpath(),
-            #                                         self.d)
+            job_checkbox = web_driver.explicit_wait(self, 10, "XPATH",
+                                                    Read_Visitor_Search_jobs_Components().VSJ_checkbox_by_xpath(),
+                                                    self.d)
             job_checkbox = self.d.find_elements(By.XPATH, Read_Visitor_Search_jobs_Components().VSJ_checkbox_by_xpath())
             no_of_jobs_before = len(job_checkbox)
             self.logger.info(f"before: {no_of_jobs_before}")
             self.select_date_range()
             time.sleep(web_driver.one_second)
-            # job_checkbox = web_driver.explicit_wait(self, 10, "XPATH",
-            #                                         Read_Visitor_Search_jobs_Components().VSJ_checkbox_by_xpath(),
-            #                                         self.d)
+            job_checkbox = web_driver.explicit_wait(self, 10, "XPATH",
+                                                    Read_Visitor_Search_jobs_Components().VSJ_checkbox_by_xpath(),
+                                                    self.d)
             job_checkbox = self.d.find_elements(By.XPATH, Read_Visitor_Search_jobs_Components().VSJ_checkbox_by_xpath())
             no_of_jobs_after = len(job_checkbox)
             self.logger.info(f"after: {no_of_jobs_after}")
@@ -857,7 +857,7 @@ class Visitor_Search_Jobs_Module_pom(web_driver, web_logger):
         upload_photo = web_driver.explicit_wait(self, 20, "XPATH", Read_Visitor_Search_jobs_Components().photo_upload_container_by_xpath(), self.d)
         upload_photo.click()
         time.sleep(web_driver.two_second)
-        file_path = f"{Path(__file__).parent.parent.parent}\\All_Test_Data\\Common_Test_data\\dataset2\\fraud\\124614.png"
+        file_path = f"{Path(__file__).parent.parent.parent}\\All_Test_Data\\Common_Test_data\\dataset3\\ab\\1824_20220526-124520.png"
 
         time.sleep(web_driver.two_second)
         pyautogui.write(file_path)

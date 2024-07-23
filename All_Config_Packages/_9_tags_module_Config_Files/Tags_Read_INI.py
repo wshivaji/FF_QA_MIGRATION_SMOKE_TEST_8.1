@@ -502,27 +502,6 @@ class Read_Tags_Components:
         except Exception as ex:
             print(ex.args)
 
-    def serious_tag(self):
-        try:
-            tags = self.common_test_data_config.get("Tags_Data","serious_tag")
-            return tags
-        except Exception as ex:
-            print(ex.args)
-
-    def non_serious_tag(self):
-        try:
-            tags = self.common_test_data_config.get("Tags_Data","non_serious_tag")
-            return tags
-        except Exception as ex:
-            print(ex.args)
-
-    def serious_tag(self):
-        try:
-            tags = self.common_test_data_config.get("Tags_Data","serious_tag")
-            return tags
-        except Exception as ex:
-            print(ex.args)
-
     def read_non_serious_tags_input_data(self):
         try:
             read_non_serious_tags_input_data = self.common_test_data_config.get("Tags_Data","read_non_serious_tags_input_data")

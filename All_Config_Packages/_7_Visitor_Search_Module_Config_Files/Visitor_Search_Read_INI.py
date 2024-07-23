@@ -110,21 +110,21 @@ class Read_Visitor_Search_Components:
 
     def meta_data_start_date(self):
         try:
-            ele = self.common_test_data_config.get("common_data", "meta_data_start_date")
+            ele = self.common_test_data_config.get("Visitor_Search_Data", "meta_data_start_date")
             return ele
         except Exception as ex:
             print("meta_data_start_date : ", ex)
 
     def meta_data_start_month(self):
         try:
-            ele = self.common_test_data_config.get("common_data", "meta_data_start_month")
+            ele = self.common_test_data_config.get("Visitor_Search_Data", "meta_data_start_month")
             return ele
         except Exception as ex:
             print("meta_data_start_month : ", ex)
 
     def meta_data_start_year(self):
         try:
-            ele = self.common_test_data_config.get("common_data", "meta_data_start_year")
+            ele = self.common_test_data_config.get("Visitor_Search_Data", "meta_data_start_year")
             return ele
         except Exception as ex:
             print("meta_data_start_year : ", ex)
@@ -152,21 +152,21 @@ class Read_Visitor_Search_Components:
 
     def meta_data_end_date(self):
         try:
-            ele = self.common_test_data_config.get("common_data", "meta_data_end_date")
+            ele = self.common_test_data_config.get("Visitor_Search_Data", "meta_data_end_date")
             return ele
         except Exception as ex:
             print("meta_data_end_date : ", ex)
 
     def meta_data_end_month(self):
         try:
-            ele = self.common_test_data_config.get("common_data", "meta_data_end_month")
+            ele = self.common_test_data_config.get("Visitor_Search_Data", "meta_data_end_month")
             return ele
         except Exception as ex:
             print("meta_data_end_month : ", ex)
 
     def meta_data_end_year(self):
         try:
-            ele = self.common_test_data_config.get("common_data", "meta_data_end_year")
+            ele = self.common_test_data_config.get("Visitor_Search_Data", "meta_data_end_year")
             return ele
         except Exception as ex:
             print("meta_data_end_year : ", ex)

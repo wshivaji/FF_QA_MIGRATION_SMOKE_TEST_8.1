@@ -5,7 +5,6 @@ from selenium.webdriver.support.select import Select
 
 from All_Config_Packages._1_Portal_Login_Module_Config_Files.Portal_Login_Page_Read_INI import \
     Portal_login_page_read_ini
-from All_POM_Packages.Portal_Menu_Module_POM.Portal_Menu_Module_POM import Portal_Menu_Module_pom
 from Base_Package.Web_Driver import web_driver
 from Base_Package.Web_Logger import web_logger
 from selenium.webdriver.common.by import By
@@ -95,7 +94,10 @@ class Notification_Groups_Module_pom(web_driver, web_logger):
         try:
             self.logger.info("********** Test_NG_TC01 Begin  **********")
             status = []
-            login().login_to_cloud_if_not_done(self.d)
+
+            x = Read_Notification_Groups_Components().get_user_name_input_data()
+            username = x.split(',')
+            login().login_with_persona_user(self.d, username[4])
             time.sleep(web_driver.one_second)
 
             x = Read_Notification_Groups_Components().get_dummy_notification_group_name()
@@ -103,36 +105,29 @@ class Notification_Groups_Module_pom(web_driver, web_logger):
             self.logger.info(f"notification Groups List: {notification_group_names_list}")
             for ng in notification_group_names_list:
                 self.open_notification_groups_module()
-                ng_list_enlisted = self.d.find_elements(By.XPATH, Read_Notification_Groups_Components().notification_groups_list_by_xpath())
-                self.logger.info(f"enlisted groups count: {len(ng_list_enlisted)}")
-                ng_list_enlisted_list = []
-                for ng_name in ng_list_enlisted:
-                    ng_list_enlisted_list.append(ng_name.text)
-                self.logger.info(f"ng list: {ng_list_enlisted_list}")
-                if ng not in ng_list_enlisted_list:
-                    action_btn = self.d.find_element(By.XPATH, Read_Notification_Groups_Components().
-                                                     action_dropdown_button_by_xpath())
-                    time.sleep(web_driver.two_second)
-                    action_btn.click()
-                    time.sleep(web_driver.one_second)
-                    create_notification = self.d.find_element(By.XPATH, Read_Notification_Groups_Components()
-                                                              .create_notification_group_btn_by_xpath())
-                    create_notification.click()
-                    # name_field = self.d.find_element(By.XPATH, Read_Notification_Groups_Components().name_field_by_xpath())
-                    name_field = web_driver.explicit_wait(self, 10, "XPATH", Read_Notification_Groups_Components().name_field_by_xpath(), self.d)
-                    name_field.send_keys(ng)
+                action_btn = self.d.find_element(By.XPATH, Read_Notification_Groups_Components().
+                                                 action_dropdown_button_by_xpath())
+                time.sleep(web_driver.two_second)
+                action_btn.click()
+                time.sleep(web_driver.one_second)
+                create_notification = self.d.find_element(By.XPATH, Read_Notification_Groups_Components()
+                                                          .create_notification_group_btn_by_xpath())
+                create_notification.click()
+                # name_field = self.d.find_element(By.XPATH, Read_Notification_Groups_Components().name_field_by_xpath())
+                name_field = web_driver.explicit_wait(self, 10, "XPATH", Read_Notification_Groups_Components().name_field_by_xpath(), self.d)
+                name_field.send_keys(ng)
 
-                    description_field = self.d.find_element(By.XPATH, Read_Notification_Groups_Components()
-                                                            .description_field_by_xpath())
-                    description_field.send_keys(Read_Notification_Groups_Components().get_notification_group_description())
+                description_field = self.d.find_element(By.XPATH, Read_Notification_Groups_Components()
+                                                        .description_field_by_xpath())
+                description_field.send_keys(Read_Notification_Groups_Components().get_notification_group_description())
 
-                    save_button = self.d.find_element(By.XPATH, Read_Notification_Groups_Components().save_button_by_xpath())
-                    time.sleep(web_driver.one_second)
-                    save_button.click()
-                    time.sleep(web_driver.two_second)
-                    status.append(Notification_Groups_Module_pom().validate_successful_message())
-                    time.sleep(web_driver.one_second)
-                    self.close_all_panels()
+                save_button = self.d.find_element(By.XPATH, Read_Notification_Groups_Components().save_button_by_xpath())
+                time.sleep(web_driver.one_second)
+                save_button.click()
+                time.sleep(web_driver.two_second)
+                status.append(Notification_Groups_Module_pom().validate_successful_message())
+                time.sleep(web_driver.one_second)
+                self.close_all_panels()
             # ------------------------------------------------
 
             x = Read_Notification_Groups_Components().get_user_name_input_data()
@@ -214,23 +209,25 @@ class Notification_Groups_Module_pom(web_driver, web_logger):
             self.d.save_screenshot(f"{self.screenshots_path}\\TC_NG_01_exception.png")
             self.logger.error(f"TC_NG_01 got exception as: {ex.args}")
             return False
+        finally:
+            logout().logout_from_core(self.d)
 
     def Verify_total_count_of_NGs_is_6_including_default_NG(self):
         try:
             self.logger.info("********** Test_NG_TC02 Begin  **********")
             status = []
-            login().login_to_cloud_if_not_done(self.d)
+            x = Read_Notification_Groups_Components().get_user_name_input_data()
+            username = x.split(',')
+            login().login_with_persona_user(self.d, username[4])
             self.open_notification_groups_module()
-            self.explicit_wait(5, "XPATH", Read_Notification_Groups_Components().get_number_of_ngs_by_xpath(), self.d)
+
             number_of_ngs = self.d.find_element(By.XPATH, Read_Notification_Groups_Components().get_number_of_ngs_by_xpath())
-            number_of_ngs_list = number_of_ngs.text.split(' ')
-            self.logger.info(f"list: {number_of_ngs_list}")
             time.sleep(web_driver.one_second)
-            self.logger.info(f"actual count: {number_of_ngs_list[3]}")
+            self.logger.info(f"actual count: {number_of_ngs.text}")
             expected_ngs = Read_Notification_Groups_Components().get_total_number_of_ngs()
             time.sleep(web_driver.one_second)
-            self.logger.info(f"expected count greater Than: {expected_ngs}")
-            if int(expected_ngs) <= int(number_of_ngs_list[3]):
+            self.logger.info(f"expected count: {expected_ngs}")
+            if expected_ngs in number_of_ngs.text:
                 status.append(True)
             else:
                 status.append(False)
@@ -249,6 +246,8 @@ class Notification_Groups_Module_pom(web_driver, web_logger):
             self.d.save_screenshot(f"{self.screenshots_path}\\TC_NG_02_exception.png")
             self.logger.error(f"TC_NG_02 got exception as: {ex.args}")
             return False
+        finally:
+            logout().logout_from_core(self.d)
 
     def Verify_user_able_to_create_a_new_Notification_Group_by_filling_all_the_fields_and_verify_present_3_buttons_below_are_activated(self):
         try:

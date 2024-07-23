@@ -26,154 +26,121 @@ class Enrollments_Groups_Module_pom(web_driver, web_logger):
         try:
             self.logger.info("********** Test_EG_01 Begin  **********")
             status = []
-            login().login_to_cloud_if_not_done(self.d)
+            x = Read_Notification_Groups_Components().get_user_name_input_data()
+            username = x.split(',')
+            login().login_with_persona_user(self.d, username[4])
             time.sleep(web_driver.one_second)
             x = Read_Enrollment_Groups_Components().get_enrollment_group_name()
             enrollment_group_names_list = x.split(',')
             self.logger.info(f"eg list: {enrollment_group_names_list}")
-            enrollment_groups_btn = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().
-                                                        enrollment_groups_button_by_xpath())
-            time.sleep(web_driver.one_second)
-            enrollment_groups_btn.click()
-            self.explicit_wait(5, "XPATH", Read_Enrollment_Groups_Components().enrollment_group_list_by_xpath(), self.d)
-            eg_names_displayed = self.d.find_elements(By.XPATH, Read_Enrollment_Groups_Components().enrollment_group_list_by_xpath())
-            eg_names_displayed_list = []
-            for eg in eg_names_displayed:
-                eg_names_displayed_list.append(eg.text)
-            close_panel = self.d.find_elements(By.XPATH,
-                                               Portal_Menu_Module_read_ini().get_close_panel_button_by_xpath())
-            for panels in close_panel:
-                panels.click()
-                time.sleep(web_driver.one_second)
+            count = 0
             for eg in enrollment_group_names_list:
-                # count = count + 1
+                count = count + 1
+                time.sleep(web_driver.one_second)
                 enrollment_groups_btn = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().
                                                             enrollment_groups_button_by_xpath())
                 time.sleep(web_driver.one_second)
                 enrollment_groups_btn.click()
-                self.explicit_wait(5, "XPATH", Read_Enrollment_Groups_Components().enrollment_group_list_by_xpath(),
-                                   self.d)
+                action_btn = web_driver.explicit_wait(self, 5, "XPATH", Read_Enrollment_Groups_Components().action_dropdown_button_by_xpath(), self.d)
+                time.sleep(web_driver.one_second)
+                action_btn.click()
+                time.sleep(web_driver.one_second)
+                create_enrollment = self.d.find_element(By.XPATH,
+                                                        Read_Enrollment_Groups_Components().create_enrollment_group_button_by_xpath())
+                create_enrollment.click()
+                time.sleep(web_driver.one_second)
 
-                if eg not in eg_names_displayed_list:
-                    time.sleep(web_driver.one_second)
+                name_field = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().name_field_by_xpath())
+                name_field.send_keys(eg)
 
-                    action_btn = web_driver.explicit_wait(self, 5, "XPATH", Read_Enrollment_Groups_Components().action_dropdown_button_by_xpath(), self.d)
-                    time.sleep(web_driver.one_second)
-                    action_btn.click()
-                    time.sleep(web_driver.one_second)
-                    create_enrollment = self.d.find_element(By.XPATH,
-                                                            Read_Enrollment_Groups_Components().create_enrollment_group_button_by_xpath())
-                    create_enrollment.click()
-                    time.sleep(web_driver.one_second)
+                description_field = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().description_field_by_xpath())
+                description_field.send_keys(Read_Enrollment_Groups_Components().description_field_data())
 
-                    name_field = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().name_field_by_xpath())
-                    name_field.send_keys(eg)
-
-                    description_field = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().description_field_by_xpath())
-                    description_field.send_keys(Read_Enrollment_Groups_Components().description_field_data())
-
-                    time.sleep(web_driver.one_second)
-                    dp_dwn_btn = self.explicit_wait(10, "XPATH", Read_Enrollment_Groups_Components()
-                                       .serious_offender_drop_down_by_xpath(), self.d)
-                    select = Select(dp_dwn_btn)
-                    options = select.options
-                    for option in options:
-                        value = option.get_attribute("value")
-                        if (eg == enrollment_group_names_list[
-                            0]) and (value == Read_Enrollment_Groups_Components().serious_offender_high()):
-                            select.select_by_visible_text(value)
-                            self.logger.info(f"{enrollment_group_names_list[0]} is selected as serious offender {value}")
-                        elif (eg == enrollment_group_names_list[
-                            1]) and (value == Read_Enrollment_Groups_Components().serious_offender_input_data()):
-                            select.select_by_visible_text(value)
-                            self.logger.info(f"{enrollment_group_names_list[1]} is selected as serious offender {value}")
-                        elif (eg == enrollment_group_names_list[
-                            2]) and (value == Read_Enrollment_Groups_Components().serious_offender_low()):
-                            select.select_by_visible_text(value)
-                            self.logger.info(f"{enrollment_group_names_list[2]} is selected as serious offender {value}")
-                        else:
-                            pass
-
-                    time.sleep(web_driver.two_second)
-                    save_button = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().save_button_by_xpath())
-                    time.sleep(web_driver.one_second)
-                    save_button.click()
-
-                    time.sleep(web_driver.two_second)
-                    success_message = self.d.find_element(By.XPATH,
-                                                          Read_Enrollment_Groups_Components().success_message_by_xpath()).text
-                    self.logger.info(f"actual message: {success_message}")
-                    ex_success_msg = Read_Enrollment_Groups_Components().success_message_validation_text()
-                    self.logger.info(f"expected message: {ex_success_msg}")
-                    if ex_success_msg == success_message:
-                        status.append(True)
+                time.sleep(web_driver.one_second)
+                dp_dwn_btn = self.explicit_wait(10, "XPATH", Read_Enrollment_Groups_Components()
+                                   .serious_offender_drop_down_by_xpath(), self.d)
+                select = Select(dp_dwn_btn)
+                options = select.options
+                for option in options:
+                    value = option.get_attribute("value")
+                    if (eg == enrollment_group_names_list[
+                        0]) and (value == Read_Enrollment_Groups_Components().serious_offender_high()):
+                        select.select_by_visible_text(value)
+                        self.logger.info(f"{enrollment_group_names_list[0]} is selected as serious offender {value}")
+                    elif (eg == enrollment_group_names_list[
+                        1]) and (value == Read_Enrollment_Groups_Components().serious_offender_input_data()):
+                        select.select_by_visible_text(value)
+                        self.logger.info(f"{enrollment_group_names_list[1]} is selected as serious offender {value}")
+                    elif (eg == enrollment_group_names_list[
+                        2]) and (value == Read_Enrollment_Groups_Components().serious_offender_low()):
+                        select.select_by_visible_text(value)
+                        self.logger.info(f"{enrollment_group_names_list[2]} is selected as serious offender {value}")
                     else:
-                        status.append(False)
+                        pass
 
-                    # *************************************************************************
-                    time.sleep(web_driver.one_second)
-                    notification_group_btn = self.d.find_element(By.XPATH,
-                                                                 Read_Enrollment_Groups_Components().notification_group_in_enrollment_group())
-                    notification_group_btn.click()
-                    time.sleep(web_driver.one_second)
-                    filter_button_on_alert = self.d.find_element(By.XPATH,
-                                                                 Read_Enrollment_Groups_Components().get_filter_btn_on_notification_groups_panel_by_xpath())
-                    filter_button_on_alert.click()
-                    time.sleep(web_driver.two_second)
-                    unlinked_notification_groups = self.d.find_element(By.XPATH,
-                                                                       Read_Enrollment_Groups_Components().unlinked_notification_groups())
-                    unlinked_notification_groups.click()
-                    time.sleep(web_driver.one_second)
-                    alert_groups = self.d.find_elements(By.XPATH,
-                                                        Read_Notification_Groups_Components().alert_group_list_by_xpath())
-                    checkbox = self.d.find_elements(By.XPATH,
-                                                    Read_Notification_Groups_Components().alert_checkbox_by_xpath())
-                    x = Read_Notification_Groups_Components().get_notification_group_name()
-                    notification_group_names_list = x.split(',')
-                    index_value = None
-                    if eg == enrollment_group_names_list[0]:
-                        index_value = 0
-                    elif eg == enrollment_group_names_list[1]:
-                        index_value = 1
-                    elif eg == enrollment_group_names_list[2]:
-                        index_value = 2
-                    elif eg == enrollment_group_names_list[3]:
-                        index_value = 3
-                    elif eg == enrollment_group_names_list[4]:
-                        index_value = 4
-                    else:
-                        self.logger.info("eg selected is not as expected")
-                    # self.logger.info(f"index value: {index_value}")
-                    for i in range(len(alert_groups)):
-                        if alert_groups[i].text == notification_group_names_list[index_value]:
-                            checkbox[i].click()
-                            time.sleep(web_driver.one_second)
-                            self.d.find_element(By.XPATH,
-                                                Read_Enrollment_Groups_Components().get_action_dropdown_on_notification_groups_panel_by_xpath()).click()
-                            time.sleep(web_driver.one_second)
-                            add_to_enrollment_group = self.d.find_element(By.XPATH,
-                                                                          Read_Enrollment_Groups_Components().get_add_to_enrollment_groups_option_by_xpath())
-                            add_to_enrollment_group.click()
-                            time.sleep(web_driver.one_second)
-                            alert_groups = self.d.find_elements(By.XPATH,
-                                                                Read_Notification_Groups_Components().alert_group_list_by_xpath())
-                            # users_btn = self.d.find_elements(By.XPATH,
-                            #                                  Read_Enrollment_Groups_Components().get_users_btn_on_notification_groups_panel_by_xpath())
-                            for j in range(len(alert_groups)):
-                                if alert_groups[j].text == notification_group_names_list[index_value]:
-                                    self.logger.info(
-                                        f"{notification_group_names_list[index_value]} alert group linked successfully with enrollment group..")
-                                    status.append(True)
-                                    break
-                            break
-                    close_panel = self.d.find_elements(By.XPATH, Portal_Menu_Module_read_ini().get_close_panel_button_by_xpath())
-                    for panels in close_panel:
-                        panels.click()
-                        time.sleep(web_driver.one_second)
-                            # break
-                else:
-                    self.logger.info("all enrollment groups are available")
+                time.sleep(web_driver.two_second)
+                save_button = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().save_button_by_xpath())
+                time.sleep(web_driver.one_second)
+                save_button.click()
+
+                time.sleep(web_driver.two_second)
+                success_message = self.d.find_element(By.XPATH,
+                                                      Read_Enrollment_Groups_Components().success_message_by_xpath()).text
+                self.logger.info(f"actual message: {success_message}")
+                ex_success_msg = Read_Enrollment_Groups_Components().success_message_validation_text()
+                self.logger.info(f"expected message: {ex_success_msg}")
+                if ex_success_msg == success_message:
                     status.append(True)
+                else:
+                    status.append(False)
+                # *************************************************************************
+                time.sleep(web_driver.one_second)
+                notification_group_btn = self.d.find_element(By.XPATH,
+                                                             Read_Enrollment_Groups_Components().notification_group_in_enrollment_group())
+                notification_group_btn.click()
+                time.sleep(web_driver.one_second)
+                filter_button_on_alert = self.d.find_element(By.XPATH,
+                                                             Read_Enrollment_Groups_Components().get_filter_btn_on_notification_groups_panel_by_xpath())
+                filter_button_on_alert.click()
+                time.sleep(web_driver.two_second)
+                unlinked_notification_groups = self.d.find_element(By.XPATH,
+                                                                   Read_Enrollment_Groups_Components().unlinked_notification_groups())
+                unlinked_notification_groups.click()
+                time.sleep(web_driver.one_second)
+                alert_groups = self.d.find_elements(By.XPATH,
+                                                    Read_Notification_Groups_Components().alert_group_list_by_xpath())
+                checkbox = self.d.find_elements(By.XPATH,
+                                                Read_Notification_Groups_Components().alert_checkbox_by_xpath())
+                x = Read_Notification_Groups_Components().get_notification_group_name()
+                notification_group_names_list = x.split(',')
+
+                for i in range(len(alert_groups)-1):
+                    if alert_groups[i].text == notification_group_names_list[count-1]:
+
+                        checkbox[i].click()
+                        time.sleep(web_driver.one_second)
+                        self.d.find_element(By.XPATH,
+                                            Read_Enrollment_Groups_Components().get_action_dropdown_on_notification_groups_panel_by_xpath()).click()
+                        time.sleep(web_driver.one_second)
+                        add_to_enrollment_group = self.d.find_element(By.XPATH,
+                                                                      Read_Enrollment_Groups_Components().get_add_to_enrollment_groups_option_by_xpath())
+                        add_to_enrollment_group.click()
+                        time.sleep(web_driver.one_second)
+                        alert_groups = self.d.find_elements(By.XPATH,
+                                                            Read_Notification_Groups_Components().alert_group_list_by_xpath())
+                        # users_btn = self.d.find_elements(By.XPATH,
+                        #                                  Read_Enrollment_Groups_Components().get_users_btn_on_notification_groups_panel_by_xpath())
+                        for j in range(len(alert_groups)):
+                            if alert_groups[j].text == notification_group_names_list[count-1]:
+                                self.logger.info(
+                                    f"{notification_group_names_list[count-1]} alert group linked successfully with enrollment group..")
+                                status.append(True)
+                        close_panel = self.d.find_elements(By.XPATH,
+                                                           Portal_Menu_Module_read_ini().get_close_panel_button_by_xpath())
+                        for panels in close_panel:
+                            panels.click()
+                            time.sleep(web_driver.one_second)
+                        break
 
             self.logger.info(f"status: {status}")
             if False in status:
@@ -188,12 +155,16 @@ class Enrollments_Groups_Module_pom(web_driver, web_logger):
             self.d.save_screenshot(f"{self.screenshots_path}\\TC_SLT_04_exception.png")
             self.logger.error(f"TC_SLT_04 got exception as: {ex.args}")
             return False
+        finally:
+            logout().logout_from_core(self.d)
 
     def Verify_total_count_of_EGs_is_6_including_default_EG(self):
         try:
             self.logger.info("********** Test_EG_TC02 Begin  **********")
             status = []
-            login().login_to_cloud_if_not_done(self.d)
+            x = Read_Notification_Groups_Components().get_user_name_input_data()
+            username = x.split(',')
+            login().login_with_persona_user(self.d, username[4])
             time.sleep(web_driver.one_second)
             enrollment_groups_btn = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().
                                                         enrollment_groups_button_by_xpath())
@@ -202,12 +173,11 @@ class Enrollments_Groups_Module_pom(web_driver, web_logger):
 
             number_of_egs = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().get_number_of_egs_by_xpath())
             time.sleep(web_driver.one_second)
-            number_of_egs_list = number_of_egs.text.split(' ')
             self.logger.info(f"actual count: {number_of_egs.text}")
-            expected_egs = Read_Enrollment_Groups_Components().get_total_number_of_egs()
+            expected_ngs = Read_Enrollment_Groups_Components().get_total_number_of_egs()
             time.sleep(web_driver.one_second)
-            self.logger.info(f"expected count: {expected_egs}")
-            if int(expected_egs) <= int(number_of_egs_list[3]):
+            self.logger.info(f"expected count: {expected_ngs}")
+            if expected_ngs in number_of_egs.text:
                 status.append(True)
             else:
                 status.append(False)
@@ -228,12 +198,16 @@ class Enrollments_Groups_Module_pom(web_driver, web_logger):
             self.d.save_screenshot(f"{self.screenshots_path}\\TC_EG_02_exception.png")
             self.logger.error(f"TC_EG_02 got exception as: {ex.args}")
             return False
+        finally:
+            logout().logout_from_core(self.d)
 
     def Verify_for_above_all_5_EG_face_and_mask_threshold_value_should_be_point_83_and_suppress_duplicate_events_value_should_be_0_minute(self):
         try:
             self.logger.info("********** Test_EG_TC03 Begin  **********")
             status = []
-            login().login_to_cloud_if_not_done(self.d)
+            x = Read_Notification_Groups_Components().get_user_name_input_data()
+            username = x.split(',')
+            login().login_with_persona_user(self.d, username[4])
             time.sleep(web_driver.one_second)
             enrollment_groups_btn = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().
                                                         enrollment_groups_button_by_xpath())

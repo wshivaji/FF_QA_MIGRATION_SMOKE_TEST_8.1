@@ -2567,7 +2567,7 @@ class Read_Identify_and_Enroll_Components:
 
     def approve_enrollment_link(self):
         try:
-            approve_enrollment_link = self.config.get("LOCATORS", "approve_enrollment_link")
+            approve_enrollment_link = self.config.get("LOCATORS","approve_enrollment_link")
             return approve_enrollment_link
         except Exception as ex:
             print(ex.args)

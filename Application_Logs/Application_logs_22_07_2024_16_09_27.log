@@ -1,0 +1,18 @@
+22/07/2024 04:09:27 PM : numexpr.utils : INFO     : Note: NumExpr detected 16 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+22/07/2024 04:09:27 PM : numexpr.utils : INFO     : NumExpr defaulting to 8 threads.
+22/07/2024 04:09:29 PM : root         : INFO     :  ******** Portal_Smoke_Test_Cases Begin ********
+22/07/2024 04:09:29 PM : root         : INFO     : ************* test_TC_Insight_Dashboard_06 started  **************
+22/07/2024 04:09:37 PM : root         : INFO     : current url: https://ftecore5-vm.qa.facefirst.dev/
+22/07/2024 04:09:37 PM : root         : INFO     : url is not open
+22/07/2024 04:09:37 PM : root         : INFO     : opening localhost portal login
+22/07/2024 04:09:37 PM : root         : INFO     : logging in to core
+22/07/2024 04:09:42 PM : root         : INFO     : login success..
+22/07/2024 04:09:52 PM : root         : INFO     : eg enlisted: 
+22/07/2024 04:09:53 PM : root         : INFO     : loss prevented by enrollment groups label visible: True
+22/07/2024 04:09:54 PM : root         : INFO     : loss prevented chart visible: True
+22/07/2024 04:09:54 PM : root         : INFO     : eg enlisted: Default Enrollment Group
+22/07/2024 04:09:54 PM : root         : INFO     : eg enlisted: we
+22/07/2024 04:09:55 PM : root         : INFO     : loss prevented by enrollment groups label visible: True
+22/07/2024 04:09:55 PM : root         : INFO     : loss prevented chart visible: True
+22/07/2024 04:09:55 PM : root         : INFO     : status: [True, True]
+22/07/2024 04:09:55 PM : root         : INFO     : ************* test_TC_Insight_Dashboard_05 end  **************

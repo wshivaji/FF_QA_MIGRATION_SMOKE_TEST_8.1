@@ -139,9 +139,9 @@ class insight_dashboard_pom(web_driver, web_logger):
                     if eg.text.isalnum():
                         eg.click()
                         self.status.append(self.verify_total_loss_prevented())
-                        self.status.append(self.verify_total_new_enrollments_for_selected_eg())
-                        self.status.append(self.verify_total_facefirst_enrollments_for_selected_eg())
-                        self.status.append(self.verify_total_match_events_for_each_eg())
+                        self.status.append(self.verify_total_new_enrollments())
+                        self.status.append(self.verify_total_facefirst_enrollments())
+                        self.status.append(self.verify_total_match_events())
                         self.status.append(self.verify_visitor_searches())
                         self.status.append(self.verify_investigation_time())
                         self.status.append(self.verify_repeat_people_of_interest())
@@ -997,39 +997,6 @@ class insight_dashboard_pom(web_driver, web_logger):
         except Exception as ex:
             self.logger.info(f"verify total new enrollments exception: {ex.args}")
 
-    def verify_total_new_enrollments_for_selected_eg(self):
-        try:
-            total_new_enrollments_text = self.explicit_wait(5, "XPATH", insight_dashboard_read_ini().total_new_enrollments_label_by_xpath(), self.d)
-            self.logger.info(f"total_new_enrollments text visible: {total_new_enrollments_text.is_displayed()}")
-            self.logger.info(f"text: {total_new_enrollments_text.text}")
-            total_new_enrollments_count = self.explicit_wait(5, "XPATH", insight_dashboard_read_ini().total_new_enrollments_count_by_xpath(), self.d)
-            self.logger.info(f"total_new_enrollments count visible: {total_new_enrollments_count.is_displayed()}")
-            self.logger.info(f"count: {total_new_enrollments_count.text}")
-            total_enrollments = total_new_enrollments_count.text
-            x = []
-            if total_new_enrollments_text:
-                if total_new_enrollments_text.is_displayed():
-                    x.append(True)
-                else:
-                    x.append(False)
-            if total_new_enrollments_count:
-                if total_new_enrollments_count.is_displayed():
-                    x.append(True)
-                else:
-                    x.append(False)
-            self.logger.info(f"total_enrollments_count from ini: {insight_dashboard_read_ini().total_enrollments_count_for_selected_eg()}")
-            if int(total_enrollments) <= int(insight_dashboard_read_ini().total_enrollments_count_for_selected_eg()):
-                x.append(True)
-            else:
-                x.append(False)
-            self.logger.info(f"enrollments x: {x}")
-            if False in x:
-                return False
-            else:
-                return True
-        except Exception as ex:
-            self.logger.info(f"verify total new enrollments exception: {ex.args}")
-
     def verify_total_facefirst_enrollments(self):
         try:
             total_facefirst_enrollments_text = self.explicit_wait(5, "XPATH", insight_dashboard_read_ini().total_facefirst_enrollments_label_by_xpath(), self.d)
@@ -1051,38 +1018,6 @@ class insight_dashboard_pom(web_driver, web_logger):
                 else:
                     x.append(False)
             if total_facefirst_count == insight_dashboard_read_ini().total_enrollments_count():
-                x.append(True)
-            else:
-                x.append(False)
-            self.logger.info(f"ff enrollments x: {x}")
-            if False in x:
-                return False
-            else:
-                return True
-        except Exception as ex:
-            self.logger.info(f"verify total facefirst enrollments exception: {ex.args}")
-
-    def verify_total_facefirst_enrollments_for_selected_eg(self):
-        try:
-            total_facefirst_enrollments_text = self.explicit_wait(5, "XPATH", insight_dashboard_read_ini().total_facefirst_enrollments_label_by_xpath(), self.d)
-            self.logger.info(f"total_facefirst_enrollments text visible: {total_facefirst_enrollments_text.is_displayed()}")
-            self.logger.info(f"text: {total_facefirst_enrollments_text.text}")
-            total_facefirst_enrollments_count = self.explicit_wait(5, "XPATH", insight_dashboard_read_ini().total_facefirst_enrollments_count_by_xpath(), self.d)
-            self.logger.info(f"total_facefirst_enrollments count visible: {total_facefirst_enrollments_count.is_displayed()}")
-            self.logger.info(f"count: {total_facefirst_enrollments_count.text}")
-            total_facefirst_count = total_facefirst_enrollments_count.text
-            x = []
-            if total_facefirst_enrollments_text:
-                if total_facefirst_enrollments_text.is_displayed():
-                    x.append(True)
-                else:
-                    x.append(False)
-            if total_facefirst_enrollments_count:
-                if total_facefirst_enrollments_count.is_displayed():
-                    x.append(True)
-                else:
-                    x.append(False)
-            if int(total_facefirst_count) <= int(insight_dashboard_read_ini().total_enrollments_count_for_selected_eg()):
                 x.append(True)
             else:
                 x.append(False)
@@ -1116,39 +1051,6 @@ class insight_dashboard_pom(web_driver, web_logger):
                     x.append(False)
             self.logger.info(f"events from ini: {insight_dashboard_read_ini().total_events_count()}")
             if total_match_events_count.text == insight_dashboard_read_ini().total_events_count():
-                x.append(True)
-            else:
-                x.append(False)
-            self.logger.info(f"events x: {x}")
-            if False in x:
-                return False
-            else:
-                return True
-        except Exception as ex:
-            self.logger.info(f"verify total_match_events exception: {ex.args}")
-
-    def verify_total_match_events_for_each_eg(self):
-        try:
-            total_match_events_text = self.explicit_wait(5, "XPATH", insight_dashboard_read_ini().total_probable_match_events_label_by_xpath(), self.d)
-            self.logger.info(f"total_match_events text visible: {total_match_events_text.is_displayed()}")
-            self.logger.info(f"text: {total_match_events_text.text}")
-            total_match_events_count = self.explicit_wait(5, "XPATH", insight_dashboard_read_ini().total_probable_match_events_count_by_xpath(), self.d)
-            self.logger.info(f"total_match_events count visible: {total_match_events_count.is_displayed()}")
-            self.logger.info(f"count: {total_match_events_count.text}")
-
-            x = []
-            if total_match_events_text:
-                if total_match_events_text.is_displayed():
-                    x.append(True)
-                else:
-                    x.append(False)
-            if total_match_events_count:
-                if total_match_events_count.is_displayed():
-                    x.append(True)
-                else:
-                    x.append(False)
-            self.logger.info(f"events from ini: {insight_dashboard_read_ini().total_events_count_for_each_eg()}")
-            if int(total_match_events_count.text) <= int(insight_dashboard_read_ini().total_events_count_for_each_eg()):
                 x.append(True)
             else:
                 x.append(False)
