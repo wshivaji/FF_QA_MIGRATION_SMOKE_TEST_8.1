@@ -1,0 +1,65 @@
+14/05/2024 06:14:30 PM : selenium.webdriver.common.selenium_manager : WARNING  : The chromedriver version (123.0.6312.86) detected in PATH at C:\Python Install\Lib\site-packages\seleniumbase\drivers\chromedriver.exe might not be compatible with the detected chrome version (124.0.6367.202); currently, chromedriver 124.0.6367.207 is recommended for chrome 124.*, so it is advised to delete the driver in PATH and retry
+14/05/2024 06:14:32 PM : root         : INFO     :  ******** Portal_Smoke_Test_Cases Begin ********
+14/05/2024 06:14:32 PM : root         : INFO     : ********** Test_NG_TC01 Begin  **********
+14/05/2024 06:14:40 PM : root         : INFO     : current url: https://scecore5-vm.qa.facefirst.dev/
+14/05/2024 06:14:40 PM : root         : INFO     : url is not open
+14/05/2024 06:14:40 PM : root         : INFO     : opening localhost portal login
+14/05/2024 06:14:40 PM : root         : INFO     : logging in to core
+14/05/2024 06:14:40 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:14:41 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:14:43 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:14:44 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:14:46 PM : root         : INFO     : login success..
+14/05/2024 06:14:49 PM : root         : INFO     : notification Groups List: ['son', 'abn', 'ptn', 'fraudn', 'vipn']
+14/05/2024 06:14:50 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:14:50 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:14:50 PM : root         : INFO     : notification groups btn is clicked
+14/05/2024 06:14:54 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:14:54 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:14:57 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:14:57 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:14:57 PM : root         : INFO     : actual success msg: Success, the alert below has been created.
+14/05/2024 06:14:57 PM : root         : INFO     : expected msg: Success, the alert below has been created.
+14/05/2024 06:15:01 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:01 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:01 PM : root         : INFO     : notification groups btn is clicked
+14/05/2024 06:15:04 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:04 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:07 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:07 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:07 PM : root         : INFO     : actual success msg: Success, the alert below has been created.
+14/05/2024 06:15:07 PM : root         : INFO     : expected msg: Success, the alert below has been created.
+14/05/2024 06:15:12 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:12 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:12 PM : root         : INFO     : notification groups btn is clicked
+14/05/2024 06:15:15 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:15 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:18 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:18 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:18 PM : root         : INFO     : actual success msg: Success, the alert below has been created.
+14/05/2024 06:15:18 PM : root         : INFO     : expected msg: Success, the alert below has been created.
+14/05/2024 06:15:22 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:22 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:22 PM : root         : INFO     : notification groups btn is clicked
+14/05/2024 06:15:25 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:25 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:28 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:28 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:28 PM : root         : INFO     : actual success msg: Success, the alert below has been created.
+14/05/2024 06:15:28 PM : root         : INFO     : expected msg: Success, the alert below has been created.
+14/05/2024 06:15:32 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:32 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:32 PM : root         : INFO     : notification groups btn is clicked
+14/05/2024 06:15:35 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:36 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:39 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:39 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:39 PM : root         : INFO     : actual success msg: Success, the alert below has been created.
+14/05/2024 06:15:39 PM : root         : INFO     : expected msg: Success, the alert below has been created.
+14/05/2024 06:15:42 PM : root         : INFO     : username list: ['operator', 'responder', 'approver', 'executive', 'it admin']
+14/05/2024 06:15:42 PM : root         : INFO     : ng list: ['son', 'abn', 'ptn', 'fraudn', 'vipn']
+14/05/2024 06:15:42 PM : root         : INFO     : eg list: ['soe', 'abe', 'pte', 'fraude', 'vipe']
+14/05/2024 06:15:42 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:15:42 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:15:46 PM : root         : ERROR    : screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Migration_Smoke_Test\Reports\Screenshots\TC_NG_01_exception.png
+14/05/2024 06:15:46 PM : root         : ERROR    : TC_NG_01 got exception as: ()

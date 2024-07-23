@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function find_all(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sort_column(elem) {
+    toggle_sort_states(elem);
+    var colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    var key;
+    if (elem.classList.contains('numeric')) {
+        key = key_num;
+    } else if (elem.classList.contains('result')) {
+        key = key_result;
+    } else {
+        key = key_alpha;
+    }
+    sort_table(elem, key(colIndex));
+}
+
+function show_all_extras() {
+    find_all('.col-result').forEach(show_extras);
+}
+
+function hide_all_extras() {
+    find_all('.col-result').forEach(hide_extras);
+}
+
+function show_extras(colresult_elem) {
+    var extras = colresult_elem.parentNode.nextElementSibling;
+    var expandcollapse = colresult_elem.firstElementChild;
+    extras.classList.remove("collapsed");
+    expandcollapse.classList.remove("expander");
+    expandcollapse.classList.add("collapser");
+}
+
+function hide_extras(colresult_elem) {
+    var extras = colresult_elem.parentNode.nextElementSibling;
+    var expandcollapse = colresult_elem.firstElementChild;
+    extras.classList.add("collapsed");
+    expandcollapse.classList.remove("collapser");
+    expandcollapse.classList.add("expander");
+}
+
+function show_filters() {
+    var filter_items = document.getElementsByClassName('filter');
+    for (var i = 0; i < filter_items.length; i++)
+        filter_items[i].hidden = false;
+}
+
+function add_collapse() {
+    // Add links for show/hide all
+    var resulttable = find('table#results-table');
+    var showhideall = document.createElement("p");
+    showhideall.innerHTML = '<a href="javascript:show_all_extras()">Show all details</a> / ' +
+                            '<a href="javascript:hide_all_extras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    find_all('.col-result').forEach(function(elem) {
+        var collapsed = get_query_parameter('collapsed') || 'Passed';
+        var extras = elem.parentNode.nextElementSibling;
+        var expandcollapse = document.createElement("span");
+        if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add("collapsed");
+            expandcollapse.classList.add("expander");
+        } else {
+            expandcollapse.classList.add("collapser");
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener("click", function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains("collapsed")) {
+                show_extras(event.currentTarget);
+            } else {
+                hide_extras(event.currentTarget);
+            }
+        });
+    })
+}
+
+function get_query_parameter(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () {
+    reset_sort_headers();
+
+    add_collapse();
+
+    show_filters();
+
+    sort_column(find('.initial-sort'));
+
+    find_all('.sortable').forEach(function(elem) {
+        elem.addEventListener("click",
+                              function(event) {
+                                  sort_column(elem);
+                              }, false)
+    });
+
+};
+
+function sort_table(clicked, key_func) {
+    var rows = find_all('.results-table-row');
+    var reversed = !clicked.classList.contains('asc');
+    var sorted_rows = sort(rows, key_func, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    var thead = document.getElementById("results-table-head");
+    document.getElementById('results-table').remove();
+    var parent = document.createElement("table");
+    parent.id = "results-table";
+    parent.appendChild(thead);
+    sorted_rows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName("BODY")[0].appendChild(parent);
+}
+
+function sort(items, key_func, reversed) {
+    var sort_array = items.map(function(item, i) {
+        return [key_func(item), i];
+    });
+
+    sort_array.sort(function(a, b) {
+        var key_a = a[0];
+        var key_b = b[0];
+
+        if (key_a == key_b) return 0;
+
+        if (reversed) {
+            return (key_a < key_b ? 1 : -1);
+        } else {
+            return (key_a > key_b ? 1 : -1);
+        }
+    });
+
+    return sort_array.map(function(item) {
+        var index = item[1];
+        return items[index];
+    });
+}
+
+function key_alpha(col_index) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[col_index].firstChild.data.toLowerCase();
+    };
+}
+
+function key_num(col_index) {
+    return function(elem) {
+        return parseFloat(elem.childNodes[1].childNodes[col_index].firstChild.data);
+    };
+}
+
+function key_result(col_index) {
+    return function(elem) {
+        var strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+                       'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[col_index].firstChild.data);
+    };
+}
+
+function reset_sort_headers() {
+    find_all('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    find_all('.sortable').forEach(function(elem) {
+        var icon = document.createElement("div");
+        icon.className = "sort-icon";
+        icon.textContent = "vvv";
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove("desc", "active");
+        elem.classList.add("asc", "inactive");
+    });
+}
+
+function toggle_sort_states(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        reset_sort_headers();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function is_all_rows_hidden(value) {
+  return value.hidden == false;
+}
+
+function filter_table(elem) {
+    var outcome_att = "data-test-result";
+    var outcome = elem.getAttribute(outcome_att);
+    class_outcome = outcome + " results-table-row";
+    var outcome_rows = document.getElementsByClassName(class_outcome);
+
+    for(var i = 0; i < outcome_rows.length; i++){
+        outcome_rows[i].hidden = !elem.checked;
+    }
+
+    var rows = find_all('.results-table-row').filter(is_all_rows_hidden);
+    var all_rows_hidden = rows.length == 0 ? true : false;
+    var not_found_message = document.getElementById("not-found-message");
+    not_found_message.hidden = !all_rows_hidden;
+}
+</script>
+    <h1>DM_Test_Report_22_04_2024_19_15_36.html</h1>
+    <p>Report generated on 22-Apr-2024 at 19:15:53 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v2.0.1</p>
+    <h2>Summary</h2>
+    <p>12 tests ran in 17.21 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="passed">0 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="failed">12 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>, <input checked="true" class="filter" data-test-result="rerun" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="rerun">0 rerun</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable numeric" col="duration">Duration</th>
+          <th>Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc01</td>
+          <td class="col-duration">4.85</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x0000011710201640&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc01(self):<br/>        if Deployment_Manager_Page_Pom().verify_user_directs_to_user_register_page_and_create_a_user_by_providing_details():<br/>            assert True<br/>        else:<br/>&gt;           assert False<br/><span class="error">E           assert False</span><br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:17: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register page url:  https://localhost:5000/register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:404 ********** TC_DM_01 started ********
+INFO     root:Deployment_Manager_Page_POM.py:405 verify_user_directs_to_user_register_page_and_create_a_user_by_providing_details
+ERROR    root:Deployment_Manager_Page_POM.py:452 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_01_exception_register_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:454 TC_DM_01_exception_register_failed got an exception as: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=124.0.6367.61)
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E19AC1A]
+	(No symbol) [0x00007FF61E18D514]
+	(No symbol) [0x00007FF61E18E8F8]
+	(No symbol) [0x00007FF61E18D7FF]
+	(No symbol) [0x00007FF61E18D104]
+	(No symbol) [0x00007FF61E18D021]
+	(No symbol) [0x00007FF61E18B0A8]
+	(No symbol) [0x00007FF61E18B8BC]
+	(No symbol) [0x00007FF61E1A14AD]
+	(No symbol) [0x00007FF61E223D67]
+	(No symbol) [0x00007FF61E206FDA]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc02</td>
+          <td class="col-duration">2.49</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x0000011710926B10&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc02(self):<br/>        if Deployment_Manager_Page_Pom().verify_user_login_to_deployment_manager_using_create_user_credentials():<br/>            assert True<br/>        else:<br/>&gt;           assert False<br/><span class="error">E           assert False</span><br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:24: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:458 ********** TC_DM_02 started ********
+INFO     root:Deployment_Manager_Page_POM.py:459 verify_user_login_to_deployment_manager_using_create_user_credentials
+ERROR    root:Deployment_Manager_Page_POM.py:476 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_02_exception_register_login_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:478 TC_DM_02_exception_register_login_failed got an exception as: Message: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=124.0.6367.61)
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E19AC1A]
+	(No symbol) [0x00007FF61E18D514]
+	(No symbol) [0x00007FF61E18E8F8]
+	(No symbol) [0x00007FF61E18D7FF]
+	(No symbol) [0x00007FF61E18D104]
+	(No symbol) [0x00007FF61E18D021]
+	(No symbol) [0x00007FF61E18B0A8]
+	(No symbol) [0x00007FF61E18B8BC]
+	(No symbol) [0x00007FF61E1A14AD]
+	(No symbol) [0x00007FF61E223D67]
+	(No symbol) [0x00007FF61E206FDA]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc03</td>
+          <td class="col-duration">0.15</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x0000011710926CC0&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc03(self):<br/>        if Deployment_Manager_Page_Pom().enter_license_under_license_status_in_deployment_manager_settings():<br/>            assert True<br/>        else:<br/>&gt;           assert False<br/><span class="error">E           assert False</span><br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:31: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:482 ********** TC_DM_03 started ********
+INFO     root:Deployment_Manager_Page_POM.py:483 enter_license_under_license_status_in_deployment_manager_settings
+ERROR    root:Deployment_Manager_Page_POM.py:56 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_02_exception_Login_Failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:58 TC_DM_02_exception_Login_Failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;[id=&quot;username&quot;]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:66 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_exception_mini_window_status_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:69 TC_DM_exception_mini_window_status_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;.jss347&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:493 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_03_exception_license_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:495 TC_DM_03_exception_license_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;xpath&quot;,&quot;selector&quot;:&quot;(.//*[normalize-space(text()) and normalize-space(.)=&#x27;License Status&#x27;])[1]/following::*[name()=&#x27;svg&#x27;][1]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc04</td>
+          <td class="col-duration">0.15</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x0000011710926DE0&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc04(self):<br/>        if Deployment_Manager_Page_Pom().verify_configuring_the_domain_url_using_recommended_letsencrypt_or_ssl_certificate():<br/>            assert True<br/>        else:<br/>&gt;           assert False<br/><span class="error">E           assert False</span><br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:38: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:499 ********** TC_DM_04 started ********
+INFO     root:Deployment_Manager_Page_POM.py:500 verify_configuring_the_domain_url_using_recommended_letsencrypt_or_ssl_certificate
+ERROR    root:Deployment_Manager_Page_POM.py:56 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_02_exception_Login_Failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:58 TC_DM_02_exception_Login_Failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;[id=&quot;username&quot;]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:66 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_exception_mini_window_status_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:69 TC_DM_exception_mini_window_status_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;.jss347&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:510 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_04_exception_domain_url_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:512 TC_DM_04_exception_domain_url_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;xpath&quot;,&quot;selector&quot;:&quot;(.//*[normalize-space(text()) and normalize-space(.)=&#x27;Domain Status&#x27;])[1]/following::*[name()=&#x27;svg&#x27;][1]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc05</td>
+          <td class="col-duration">2.20</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x0000011710926F00&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc05(self):<br/>        if Deployment_Manager_Page_Pom().verify_the_deployment_options_of_core_edges_from_deployment_wizard():<br/>            assert True<br/>        else:<br/>&gt;           assert False<br/><span class="error">E           assert False</span><br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:45: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:516 ********** TC_DM_05 started ********
+INFO     root:Deployment_Manager_Page_POM.py:517 verify_the_deployment_options_of_core_edges_from_deployment_wizard
+ERROR    root:Deployment_Manager_Page_POM.py:56 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_02_exception_Login_Failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:58 TC_DM_02_exception_Login_Failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;[id=&quot;username&quot;]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:66 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_exception_mini_window_status_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:69 TC_DM_exception_mini_window_status_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;.jss347&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:550 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_05_exception_deployment_option_core_&amp;_edge_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:552 TC_DM_05_exception_deployment_option_core_&amp;_edge_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;xpath&quot;,&quot;selector&quot;:&quot;/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/ul[2]/a[1]/div[1]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc06</td>
+          <td class="col-duration">3.15</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x0000011710927020&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc06(self):<br/>        if Deployment_Manager_Page_Pom().verify_deployment_of_core_by_providing_required_details_for_core_deployment():<br/>            assert True<br/>        else:<br/>&gt;           assert False<br/><span class="error">E           assert False</span><br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:52: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:556 ********** TC_DM_06 started ********
+INFO     root:Deployment_Manager_Page_POM.py:557 verify_deployment_of_core_by_providing_required_details_for_core_deployment
+ERROR    root:Deployment_Manager_Page_POM.py:56 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_02_exception_Login_Failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:58 TC_DM_02_exception_Login_Failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;[id=&quot;username&quot;]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:66 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_exception_mini_window_status_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:69 TC_DM_exception_mini_window_status_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;.jss347&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:567 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_06_exception_core_deployment_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:569 TC_DM_06_exception_core_deployment_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;xpath&quot;,&quot;selector&quot;:&quot;/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[2]/ul[2]/a[1]/div[1]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc07</td>
+          <td class="col-duration">0.17</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x0000011710927140&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc07(self):<br/>        if Deployment_Manager_Page_Pom().verify_web_portal_url_and_login_to_web_portal_with_core_credentials_and_verify_login_successful():<br/>            assert True<br/>        else:<br/>&gt;           assert False<br/><span class="error">E           assert False</span><br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:59: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:573 ********** TC_DM_07 started ********
+INFO     root:Deployment_Manager_Page_POM.py:574 verify_web_portal_url_and_login_to_web_portal_with_core_credentials_and_verify_login_successful
+ERROR    root:Deployment_Manager_Page_POM.py:56 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_02_exception_Login_Failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:58 TC_DM_02_exception_Login_Failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;[id=&quot;username&quot;]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:66 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_exception_mini_window_status_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:69 TC_DM_exception_mini_window_status_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;.jss347&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:610 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_07_exception_portal_login_by_click_on_dm_url_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:612 TC_DM_07_exception_portal_login_by_click_on_dm_url_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;xpath&quot;,&quot;selector&quot;:&quot;(//div[@class=&#x27;jss158&#x27;])[6]//a&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc08</td>
+          <td class="col-duration">0.15</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x0000011710927260&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc08(self):<br/>        if Deployment_Manager_Page_Pom().verify_enable_disable_dashboard_enabled_should_make_appear_and_disappear_the_dashboard_on_web_portal():<br/>            assert True<br/>        else:<br/>&gt;           assert False<br/><span class="error">E           assert False</span><br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:66: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:616 ********** TC_DM_08 started ********
+INFO     root:Deployment_Manager_Page_POM.py:617 verify_enable_disable_dashboard_enabled_should_make_appear_and_disappear_the_dashboard_on_web_portal
+ERROR    root:Deployment_Manager_Page_POM.py:56 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_02_exception_Login_Failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:58 TC_DM_02_exception_Login_Failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;[id=&quot;username&quot;]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:66 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_exception_mini_window_status_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:69 TC_DM_exception_mini_window_status_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;.jss347&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:705 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_08_exception_enable_disable_dashboard_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:707 TC_DM_08_exception_enable_disable_dashboard_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;xpath&quot;,&quot;selector&quot;:&quot;(//button[@aria-label=&#x27;Edit&#x27;])[4]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc09</td>
+          <td class="col-duration">0.15</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x0000011710927380&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc09(self):<br/>        if Deployment_Manager_Page_Pom().verify_notification_email_configuration_by_proving_host_and_sender_credentials():<br/>            assert True<br/>        else:<br/>&gt;           assert False<br/><span class="error">E           assert False</span><br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:73: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:711 ********** TC_DM_09 started ********
+INFO     root:Deployment_Manager_Page_POM.py:712 verify_notification_email_configuration_by_proving_host_and_sender_credentials
+ERROR    root:Deployment_Manager_Page_POM.py:56 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_02_exception_Login_Failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:58 TC_DM_02_exception_Login_Failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;[id=&quot;username&quot;]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:66 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_exception_mini_window_status_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:69 TC_DM_exception_mini_window_status_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;.jss347&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:734 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_09_exception_mail_configuration_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:736 TC_DM_09_exception_mail_configuration_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;xpath&quot;,&quot;selector&quot;:&quot;(//button[@aria-label=&#x27;Edit&#x27;])[6]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc10</td>
+          <td class="col-duration">2.10</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;All_POM_Packages._00_Deployment_Manager_POM.Deployment_Manager_Page_POM.Deployment_Manager_Page_Pom object at 0x0000011710A1BC50&gt;<br/><br/>    def verify_visitor_log_retention_set_to_maximum_clustering_time_under_platform_settings(self):<br/>        try:<br/>            self.logger.info(&quot;********** TC_DM_10 started ********&quot;)<br/>            self.logger.info(&quot;verify_visitor_log_retention_set_to_maximum_clustering_time_under_platform_settings&quot;)<br/>            self.status.clear()<br/>            if not DeploymentManager_Read_ini().get_register_login_link_from_register_url() == self.d.current_url:<br/>                self.d.get(DeploymentManager_Read_ini().get_register_login_link_from_register_url())<br/>                time.sleep(web_driver.two_second)<br/>            self.register_login_dm_details()<br/>            self.dm_mini_window()<br/>&gt;           self.visitor_log_retention()<br/><br/>All_POM_Packages\_00_Deployment_Manager_POM\Deployment_Manager_Page_POM.py:748: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/>All_POM_Packages\_00_Deployment_Manager_POM\Deployment_Manager_Page_POM.py:340: in visitor_log_retention<br/>    self.d.find_element(&quot;xpath&quot;, &quot;(//button[@aria-label=&#x27;Edit&#x27;])[14]&quot;).click()<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:741: in find_element<br/>    return self.execute(Command.FIND_ELEMENT, {&quot;using&quot;: by, &quot;value&quot;: value})[&quot;value&quot;]<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:347: in execute<br/>    self.error_handler.check_response(response)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/><br/>self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x000001170BFA78F0&gt;<br/>response = {&#x27;status&#x27;: 404, &#x27;value&#x27;: &#x27;{&quot;value&quot;:{&quot;error&quot;:&quot;no such window&quot;,&quot;message&quot;:&quot;no such window: target window already closed\\...07FF61E2F9C24]\\n\\tBaseThreadInitThunk [0x00007FFE454E7344+20]\\n\\tRtlUserThreadStart [0x00007FFE46BA26B1+33]\\n&quot;}}&#x27;}<br/><br/>    def check_response(self, response: Dict[str, Any]) -&gt; None:<br/>        &quot;&quot;&quot;Checks that a JSON response from the WebDriver does not have an<br/>        error.<br/>    <br/>        :Args:<br/>         - response - The JSON response from the WebDriver server as a dictionary<br/>           object.<br/>    <br/>        :Raises: If the response contains an error message.<br/>        &quot;&quot;&quot;<br/>        status = response.get(&quot;status&quot;, None)<br/>        if not status or status == ErrorCode.SUCCESS:<br/>            return<br/>        value = None<br/>        message = response.get(&quot;message&quot;, &quot;&quot;)<br/>        screen: str = response.get(&quot;screen&quot;, &quot;&quot;)<br/>        stacktrace = None<br/>        if isinstance(status, int):<br/>            value_json = response.get(&quot;value&quot;, None)<br/>            if value_json and isinstance(value_json, str):<br/>                import json<br/>    <br/>                try:<br/>                    value = json.loads(value_json)<br/>                    if len(value) == 1:<br/>                        value = value[&quot;value&quot;]<br/>                    status = value.get(&quot;error&quot;, None)<br/>                    if not status:<br/>                        status = value.get(&quot;status&quot;, ErrorCode.UNKNOWN_ERROR)<br/>                        message = value.get(&quot;value&quot;) or value.get(&quot;message&quot;)<br/>                        if not isinstance(message, str):<br/>                            value = message<br/>                            message = message.get(&quot;message&quot;)<br/>                    else:<br/>                        message = value.get(&quot;message&quot;, None)<br/>                except ValueError:<br/>                    pass<br/>    <br/>        exception_class: Type[WebDriverException]<br/>        e = ErrorCode()<br/>        error_codes = [item for item in dir(e) if not item.startswith(&quot;__&quot;)]<br/>        for error_code in error_codes:<br/>            error_info = getattr(ErrorCode, error_code)<br/>            if isinstance(error_info, list) and status in error_info:<br/>                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)<br/>                break<br/>        else:<br/>            exception_class = WebDriverException<br/>    <br/>        if not value:<br/>            value = response[&quot;value&quot;]<br/>        if isinstance(value, str):<br/>            raise exception_class(value)<br/>        if message == &quot;&quot; and &quot;message&quot; in value:<br/>            message = value[&quot;message&quot;]<br/>    <br/>        screen = None  # type: ignore[assignment]<br/>        if &quot;screen&quot; in value:<br/>            screen = value[&quot;screen&quot;]<br/>    <br/>        stacktrace = None<br/>        st_value = value.get(&quot;stackTrace&quot;) or value.get(&quot;stacktrace&quot;)<br/>        if st_value:<br/>            if isinstance(st_value, str):<br/>                stacktrace = st_value.split(&quot;\n&quot;)<br/>            else:<br/>                stacktrace = []<br/>                try:<br/>                    for frame in st_value:<br/>                        line = frame.get(&quot;lineNumber&quot;, &quot;&quot;)<br/>                        file = frame.get(&quot;fileName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if line:<br/>                            file = f&quot;{file}:{line}&quot;<br/>                        meth = frame.get(&quot;methodName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if &quot;className&quot; in frame:<br/>                            meth = f&quot;{frame[&#x27;className&#x27;]}.{meth}&quot;<br/>                        msg = &quot;    at %s (%s)&quot;<br/>                        msg = msg % (meth, file)<br/>                        stacktrace.append(msg)<br/>                except TypeError:<br/>                    pass<br/>        if exception_class == UnexpectedAlertPresentException:<br/>            alert_text = None<br/>            if &quot;data&quot; in value:<br/>                alert_text = value[&quot;data&quot;].get(&quot;text&quot;)<br/>            elif &quot;alert&quot; in value:<br/>                alert_text = value[&quot;alert&quot;].get(&quot;text&quot;)<br/>            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here<br/>&gt;       raise exception_class(message, screen, stacktrace)<br/><span class="error">E       selenium.common.exceptions.NoSuchWindowException: Message: no such window: target window already closed</span><br/><span class="error">E       from unknown error: web view not found</span><br/><span class="error">E         (Session info: chrome=124.0.6367.61)</span><br/><span class="error">E       Stacktrace:</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E3970C2+63090]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E302D12]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E19EC65]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E17CA7C]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E20D687]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E222AC1]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E206D83]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D83A8]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D9441]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E79262D+4238301]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7CF78D+4488509]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E470606+953270]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E30E5DF]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3092B4]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3093EB]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E2F9C24]</span><br/><span class="error">E       	BaseThreadInitThunk [0x00007FFE454E7344+20]</span><br/><span class="error">E       	RtlUserThreadStart [0x00007FFE46BA26B1+33]</span><br/><br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:229: NoSuchWindowException<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x00000117109274A0&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc10(self):<br/>&gt;       if Deployment_Manager_Page_Pom().verify_visitor_log_retention_set_to_maximum_clustering_time_under_platform_settings():<br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:77: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/>All_POM_Packages\_00_Deployment_Manager_POM\Deployment_Manager_Page_POM.py:762: in verify_visitor_log_retention_set_to_maximum_clustering_time_under_platform_settings<br/>    self.d.save_screenshot(f&quot;{self.screenshots_path}\\TC_DM_10_visitor_log_retention_failed.png&quot;)<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:822: in save_screenshot<br/>    return self.get_screenshot_as_file(filename)<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:798: in get_screenshot_as_file<br/>    png = self.get_screenshot_as_png()<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:832: in get_screenshot_as_png<br/>    return b64decode(self.get_screenshot_as_base64().encode(&quot;ascii&quot;))<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:843: in get_screenshot_as_base64<br/>    return self.execute(Command.SCREENSHOT)[&quot;value&quot;]<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:347: in execute<br/>    self.error_handler.check_response(response)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/><br/>self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x000001170BFA78F0&gt;<br/>response = {&#x27;status&#x27;: 404, &#x27;value&#x27;: &#x27;{&quot;value&quot;:{&quot;error&quot;:&quot;no such window&quot;,&quot;message&quot;:&quot;no such window: target window already closed\\...07FF61E2F9C24]\\n\\tBaseThreadInitThunk [0x00007FFE454E7344+20]\\n\\tRtlUserThreadStart [0x00007FFE46BA26B1+33]\\n&quot;}}&#x27;}<br/><br/>    def check_response(self, response: Dict[str, Any]) -&gt; None:<br/>        &quot;&quot;&quot;Checks that a JSON response from the WebDriver does not have an<br/>        error.<br/>    <br/>        :Args:<br/>         - response - The JSON response from the WebDriver server as a dictionary<br/>           object.<br/>    <br/>        :Raises: If the response contains an error message.<br/>        &quot;&quot;&quot;<br/>        status = response.get(&quot;status&quot;, None)<br/>        if not status or status == ErrorCode.SUCCESS:<br/>            return<br/>        value = None<br/>        message = response.get(&quot;message&quot;, &quot;&quot;)<br/>        screen: str = response.get(&quot;screen&quot;, &quot;&quot;)<br/>        stacktrace = None<br/>        if isinstance(status, int):<br/>            value_json = response.get(&quot;value&quot;, None)<br/>            if value_json and isinstance(value_json, str):<br/>                import json<br/>    <br/>                try:<br/>                    value = json.loads(value_json)<br/>                    if len(value) == 1:<br/>                        value = value[&quot;value&quot;]<br/>                    status = value.get(&quot;error&quot;, None)<br/>                    if not status:<br/>                        status = value.get(&quot;status&quot;, ErrorCode.UNKNOWN_ERROR)<br/>                        message = value.get(&quot;value&quot;) or value.get(&quot;message&quot;)<br/>                        if not isinstance(message, str):<br/>                            value = message<br/>                            message = message.get(&quot;message&quot;)<br/>                    else:<br/>                        message = value.get(&quot;message&quot;, None)<br/>                except ValueError:<br/>                    pass<br/>    <br/>        exception_class: Type[WebDriverException]<br/>        e = ErrorCode()<br/>        error_codes = [item for item in dir(e) if not item.startswith(&quot;__&quot;)]<br/>        for error_code in error_codes:<br/>            error_info = getattr(ErrorCode, error_code)<br/>            if isinstance(error_info, list) and status in error_info:<br/>                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)<br/>                break<br/>        else:<br/>            exception_class = WebDriverException<br/>    <br/>        if not value:<br/>            value = response[&quot;value&quot;]<br/>        if isinstance(value, str):<br/>            raise exception_class(value)<br/>        if message == &quot;&quot; and &quot;message&quot; in value:<br/>            message = value[&quot;message&quot;]<br/>    <br/>        screen = None  # type: ignore[assignment]<br/>        if &quot;screen&quot; in value:<br/>            screen = value[&quot;screen&quot;]<br/>    <br/>        stacktrace = None<br/>        st_value = value.get(&quot;stackTrace&quot;) or value.get(&quot;stacktrace&quot;)<br/>        if st_value:<br/>            if isinstance(st_value, str):<br/>                stacktrace = st_value.split(&quot;\n&quot;)<br/>            else:<br/>                stacktrace = []<br/>                try:<br/>                    for frame in st_value:<br/>                        line = frame.get(&quot;lineNumber&quot;, &quot;&quot;)<br/>                        file = frame.get(&quot;fileName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if line:<br/>                            file = f&quot;{file}:{line}&quot;<br/>                        meth = frame.get(&quot;methodName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if &quot;className&quot; in frame:<br/>                            meth = f&quot;{frame[&#x27;className&#x27;]}.{meth}&quot;<br/>                        msg = &quot;    at %s (%s)&quot;<br/>                        msg = msg % (meth, file)<br/>                        stacktrace.append(msg)<br/>                except TypeError:<br/>                    pass<br/>        if exception_class == UnexpectedAlertPresentException:<br/>            alert_text = None<br/>            if &quot;data&quot; in value:<br/>                alert_text = value[&quot;data&quot;].get(&quot;text&quot;)<br/>            elif &quot;alert&quot; in value:<br/>                alert_text = value[&quot;alert&quot;].get(&quot;text&quot;)<br/>            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here<br/>&gt;       raise exception_class(message, screen, stacktrace)<br/><span class="error">E       selenium.common.exceptions.NoSuchWindowException: Message: no such window: target window already closed</span><br/><span class="error">E       from unknown error: web view not found</span><br/><span class="error">E         (Session info: chrome=124.0.6367.61)</span><br/><span class="error">E       Stacktrace:</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E3970C2+63090]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E302D12]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E19EC65]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E17CA7C]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E20D687]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E222AC1]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E206D83]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D83A8]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D9441]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E79262D+4238301]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7CF78D+4488509]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E470606+953270]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E30E5DF]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3092B4]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3093EB]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E2F9C24]</span><br/><span class="error">E       	BaseThreadInitThunk [0x00007FFE454E7344+20]</span><br/><span class="error">E       	RtlUserThreadStart [0x00007FFE46BA26B1+33]</span><br/><br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:229: NoSuchWindowException<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:740 ********** TC_DM_10 started ********
+INFO     root:Deployment_Manager_Page_POM.py:741 verify_visitor_log_retention_set_to_maximum_clustering_time_under_platform_settings
+ERROR    root:Deployment_Manager_Page_POM.py:56 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_02_exception_Login_Failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:58 TC_DM_02_exception_Login_Failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;[id=&quot;username&quot;]&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:66 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_exception_mini_window_status_failed.png
+ERROR    root:Deployment_Manager_Page_POM.py:69 TC_DM_exception_mini_window_status_failed got an exception as: Message: no such element: Unable to locate element: {&quot;method&quot;:&quot;css selector&quot;,&quot;selector&quot;:&quot;.jss347&quot;}
+  (Session info: chrome=124.0.6367.61); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Stacktrace:
+	GetHandleVerifier [0x00007FF61E3970C2+63090]
+	(No symbol) [0x00007FF61E302D12]
+	(No symbol) [0x00007FF61E19EC65]
+	(No symbol) [0x00007FF61E1E499D]
+	(No symbol) [0x00007FF61E1E4ADC]
+	(No symbol) [0x00007FF61E225B37]
+	(No symbol) [0x00007FF61E20701F]
+	(No symbol) [0x00007FF61E223412]
+	(No symbol) [0x00007FF61E206D83]
+	(No symbol) [0x00007FF61E1D83A8]
+	(No symbol) [0x00007FF61E1D9441]
+	GetHandleVerifier [0x00007FF61E79262D+4238301]
+	GetHandleVerifier [0x00007FF61E7CF78D+4488509]
+	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]
+	GetHandleVerifier [0x00007FF61E470606+953270]
+	(No symbol) [0x00007FF61E30E5DF]
+	(No symbol) [0x00007FF61E3092B4]
+	(No symbol) [0x00007FF61E3093EB]
+	(No symbol) [0x00007FF61E2F9C24]
+	BaseThreadInitThunk [0x00007FFE454E7344+20]
+	RtlUserThreadStart [0x00007FFE46BA26B1+33]
+
+ERROR    root:Deployment_Manager_Page_POM.py:761 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_10_visitor_log_retention_failed.png<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc11</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;All_POM_Packages._00_Deployment_Manager_POM.Deployment_Manager_Page_POM.Deployment_Manager_Page_Pom object at 0x0000011710A6C2C0&gt;<br/><br/>    def verify_enrollment_quality_guard_is_enable_with_proper_settings(self):<br/>        try:<br/>            self.logger.info(&quot;********** TC_DM_11 started ********&quot;)<br/>            self.logger.info(&quot;verify_enrollment_quality_guard_is_enable_with_proper_settings&quot;)<br/>            self.status.clear()<br/>&gt;           if not DeploymentManager_Read_ini().get_register_login_link_from_register_url() == self.d.current_url:<br/><br/>All_POM_Packages\_00_Deployment_Manager_POM\Deployment_Manager_Page_POM.py:770: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:437: in current_url<br/>    return self.execute(Command.GET_CURRENT_URL)[&quot;value&quot;]<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:347: in execute<br/>    self.error_handler.check_response(response)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/><br/>self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x000001170BFA78F0&gt;<br/>response = {&#x27;status&#x27;: 404, &#x27;value&#x27;: &#x27;{&quot;value&quot;:{&quot;error&quot;:&quot;no such window&quot;,&quot;message&quot;:&quot;no such window: target window already closed\\...07FF61E2F9C24]\\n\\tBaseThreadInitThunk [0x00007FFE454E7344+20]\\n\\tRtlUserThreadStart [0x00007FFE46BA26B1+33]\\n&quot;}}&#x27;}<br/><br/>    def check_response(self, response: Dict[str, Any]) -&gt; None:<br/>        &quot;&quot;&quot;Checks that a JSON response from the WebDriver does not have an<br/>        error.<br/>    <br/>        :Args:<br/>         - response - The JSON response from the WebDriver server as a dictionary<br/>           object.<br/>    <br/>        :Raises: If the response contains an error message.<br/>        &quot;&quot;&quot;<br/>        status = response.get(&quot;status&quot;, None)<br/>        if not status or status == ErrorCode.SUCCESS:<br/>            return<br/>        value = None<br/>        message = response.get(&quot;message&quot;, &quot;&quot;)<br/>        screen: str = response.get(&quot;screen&quot;, &quot;&quot;)<br/>        stacktrace = None<br/>        if isinstance(status, int):<br/>            value_json = response.get(&quot;value&quot;, None)<br/>            if value_json and isinstance(value_json, str):<br/>                import json<br/>    <br/>                try:<br/>                    value = json.loads(value_json)<br/>                    if len(value) == 1:<br/>                        value = value[&quot;value&quot;]<br/>                    status = value.get(&quot;error&quot;, None)<br/>                    if not status:<br/>                        status = value.get(&quot;status&quot;, ErrorCode.UNKNOWN_ERROR)<br/>                        message = value.get(&quot;value&quot;) or value.get(&quot;message&quot;)<br/>                        if not isinstance(message, str):<br/>                            value = message<br/>                            message = message.get(&quot;message&quot;)<br/>                    else:<br/>                        message = value.get(&quot;message&quot;, None)<br/>                except ValueError:<br/>                    pass<br/>    <br/>        exception_class: Type[WebDriverException]<br/>        e = ErrorCode()<br/>        error_codes = [item for item in dir(e) if not item.startswith(&quot;__&quot;)]<br/>        for error_code in error_codes:<br/>            error_info = getattr(ErrorCode, error_code)<br/>            if isinstance(error_info, list) and status in error_info:<br/>                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)<br/>                break<br/>        else:<br/>            exception_class = WebDriverException<br/>    <br/>        if not value:<br/>            value = response[&quot;value&quot;]<br/>        if isinstance(value, str):<br/>            raise exception_class(value)<br/>        if message == &quot;&quot; and &quot;message&quot; in value:<br/>            message = value[&quot;message&quot;]<br/>    <br/>        screen = None  # type: ignore[assignment]<br/>        if &quot;screen&quot; in value:<br/>            screen = value[&quot;screen&quot;]<br/>    <br/>        stacktrace = None<br/>        st_value = value.get(&quot;stackTrace&quot;) or value.get(&quot;stacktrace&quot;)<br/>        if st_value:<br/>            if isinstance(st_value, str):<br/>                stacktrace = st_value.split(&quot;\n&quot;)<br/>            else:<br/>                stacktrace = []<br/>                try:<br/>                    for frame in st_value:<br/>                        line = frame.get(&quot;lineNumber&quot;, &quot;&quot;)<br/>                        file = frame.get(&quot;fileName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if line:<br/>                            file = f&quot;{file}:{line}&quot;<br/>                        meth = frame.get(&quot;methodName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if &quot;className&quot; in frame:<br/>                            meth = f&quot;{frame[&#x27;className&#x27;]}.{meth}&quot;<br/>                        msg = &quot;    at %s (%s)&quot;<br/>                        msg = msg % (meth, file)<br/>                        stacktrace.append(msg)<br/>                except TypeError:<br/>                    pass<br/>        if exception_class == UnexpectedAlertPresentException:<br/>            alert_text = None<br/>            if &quot;data&quot; in value:<br/>                alert_text = value[&quot;data&quot;].get(&quot;text&quot;)<br/>            elif &quot;alert&quot; in value:<br/>                alert_text = value[&quot;alert&quot;].get(&quot;text&quot;)<br/>            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here<br/>&gt;       raise exception_class(message, screen, stacktrace)<br/><span class="error">E       selenium.common.exceptions.NoSuchWindowException: Message: no such window: target window already closed</span><br/><span class="error">E       from unknown error: web view not found</span><br/><span class="error">E         (Session info: chrome=124.0.6367.61)</span><br/><span class="error">E       Stacktrace:</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E3970C2+63090]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E302D12]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E19EC65]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E17CA7C]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E20D687]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E222AC1]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E206D83]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D83A8]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D9441]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E79262D+4238301]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7CF78D+4488509]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E470606+953270]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E30E5DF]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3092B4]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3093EB]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E2F9C24]</span><br/><span class="error">E       	BaseThreadInitThunk [0x00007FFE454E7344+20]</span><br/><span class="error">E       	RtlUserThreadStart [0x00007FFE46BA26B1+33]</span><br/><br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:229: NoSuchWindowException<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x00000117109275C0&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc11(self):<br/>&gt;       if Deployment_Manager_Page_Pom().verify_enrollment_quality_guard_is_enable_with_proper_settings():<br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:84: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/>All_POM_Packages\_00_Deployment_Manager_POM\Deployment_Manager_Page_POM.py:803: in verify_enrollment_quality_guard_is_enable_with_proper_settings<br/>    self.d.save_screenshot(f&quot;{self.screenshots_path}\\TC_DM_11_enrollments_quality_guard_failed.png&quot;)<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:822: in save_screenshot<br/>    return self.get_screenshot_as_file(filename)<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:798: in get_screenshot_as_file<br/>    png = self.get_screenshot_as_png()<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:832: in get_screenshot_as_png<br/>    return b64decode(self.get_screenshot_as_base64().encode(&quot;ascii&quot;))<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:843: in get_screenshot_as_base64<br/>    return self.execute(Command.SCREENSHOT)[&quot;value&quot;]<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:347: in execute<br/>    self.error_handler.check_response(response)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/><br/>self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x000001170BFA78F0&gt;<br/>response = {&#x27;status&#x27;: 404, &#x27;value&#x27;: &#x27;{&quot;value&quot;:{&quot;error&quot;:&quot;no such window&quot;,&quot;message&quot;:&quot;no such window: target window already closed\\...07FF61E2F9C24]\\n\\tBaseThreadInitThunk [0x00007FFE454E7344+20]\\n\\tRtlUserThreadStart [0x00007FFE46BA26B1+33]\\n&quot;}}&#x27;}<br/><br/>    def check_response(self, response: Dict[str, Any]) -&gt; None:<br/>        &quot;&quot;&quot;Checks that a JSON response from the WebDriver does not have an<br/>        error.<br/>    <br/>        :Args:<br/>         - response - The JSON response from the WebDriver server as a dictionary<br/>           object.<br/>    <br/>        :Raises: If the response contains an error message.<br/>        &quot;&quot;&quot;<br/>        status = response.get(&quot;status&quot;, None)<br/>        if not status or status == ErrorCode.SUCCESS:<br/>            return<br/>        value = None<br/>        message = response.get(&quot;message&quot;, &quot;&quot;)<br/>        screen: str = response.get(&quot;screen&quot;, &quot;&quot;)<br/>        stacktrace = None<br/>        if isinstance(status, int):<br/>            value_json = response.get(&quot;value&quot;, None)<br/>            if value_json and isinstance(value_json, str):<br/>                import json<br/>    <br/>                try:<br/>                    value = json.loads(value_json)<br/>                    if len(value) == 1:<br/>                        value = value[&quot;value&quot;]<br/>                    status = value.get(&quot;error&quot;, None)<br/>                    if not status:<br/>                        status = value.get(&quot;status&quot;, ErrorCode.UNKNOWN_ERROR)<br/>                        message = value.get(&quot;value&quot;) or value.get(&quot;message&quot;)<br/>                        if not isinstance(message, str):<br/>                            value = message<br/>                            message = message.get(&quot;message&quot;)<br/>                    else:<br/>                        message = value.get(&quot;message&quot;, None)<br/>                except ValueError:<br/>                    pass<br/>    <br/>        exception_class: Type[WebDriverException]<br/>        e = ErrorCode()<br/>        error_codes = [item for item in dir(e) if not item.startswith(&quot;__&quot;)]<br/>        for error_code in error_codes:<br/>            error_info = getattr(ErrorCode, error_code)<br/>            if isinstance(error_info, list) and status in error_info:<br/>                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)<br/>                break<br/>        else:<br/>            exception_class = WebDriverException<br/>    <br/>        if not value:<br/>            value = response[&quot;value&quot;]<br/>        if isinstance(value, str):<br/>            raise exception_class(value)<br/>        if message == &quot;&quot; and &quot;message&quot; in value:<br/>            message = value[&quot;message&quot;]<br/>    <br/>        screen = None  # type: ignore[assignment]<br/>        if &quot;screen&quot; in value:<br/>            screen = value[&quot;screen&quot;]<br/>    <br/>        stacktrace = None<br/>        st_value = value.get(&quot;stackTrace&quot;) or value.get(&quot;stacktrace&quot;)<br/>        if st_value:<br/>            if isinstance(st_value, str):<br/>                stacktrace = st_value.split(&quot;\n&quot;)<br/>            else:<br/>                stacktrace = []<br/>                try:<br/>                    for frame in st_value:<br/>                        line = frame.get(&quot;lineNumber&quot;, &quot;&quot;)<br/>                        file = frame.get(&quot;fileName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if line:<br/>                            file = f&quot;{file}:{line}&quot;<br/>                        meth = frame.get(&quot;methodName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if &quot;className&quot; in frame:<br/>                            meth = f&quot;{frame[&#x27;className&#x27;]}.{meth}&quot;<br/>                        msg = &quot;    at %s (%s)&quot;<br/>                        msg = msg % (meth, file)<br/>                        stacktrace.append(msg)<br/>                except TypeError:<br/>                    pass<br/>        if exception_class == UnexpectedAlertPresentException:<br/>            alert_text = None<br/>            if &quot;data&quot; in value:<br/>                alert_text = value[&quot;data&quot;].get(&quot;text&quot;)<br/>            elif &quot;alert&quot; in value:<br/>                alert_text = value[&quot;alert&quot;].get(&quot;text&quot;)<br/>            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here<br/>&gt;       raise exception_class(message, screen, stacktrace)<br/><span class="error">E       selenium.common.exceptions.NoSuchWindowException: Message: no such window: target window already closed</span><br/><span class="error">E       from unknown error: web view not found</span><br/><span class="error">E         (Session info: chrome=124.0.6367.61)</span><br/><span class="error">E       Stacktrace:</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E3970C2+63090]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E302D12]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E19EC65]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E17CA7C]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E20D687]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E222AC1]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E206D83]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D83A8]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D9441]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E79262D+4238301]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7CF78D+4488509]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E470606+953270]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E30E5DF]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3092B4]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3093EB]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E2F9C24]</span><br/><span class="error">E       	BaseThreadInitThunk [0x00007FFE454E7344+20]</span><br/><span class="error">E       	RtlUserThreadStart [0x00007FFE46BA26B1+33]</span><br/><br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:229: NoSuchWindowException<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:767 ********** TC_DM_11 started ********
+INFO     root:Deployment_Manager_Page_POM.py:768 verify_enrollment_quality_guard_is_enable_with_proper_settings
+ERROR    root:Deployment_Manager_Page_POM.py:802 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_11_enrollments_quality_guard_failed.png<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">All_Test_Cases_Package/_00_Deployment_Manager/test_deployment_manager_page_test_cases.py::Test_Deployment_Manager_Page_Test_Cases::test_dm_tc12</td>
+          <td class="col-duration">0.00</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;All_POM_Packages._00_Deployment_Manager_POM.Deployment_Manager_Page_POM.Deployment_Manager_Page_Pom object at 0x0000011710AE9DC0&gt;<br/><br/>    def verify_session_time_is_set_to_maximum_value_under_platform_settings(self):<br/>        try:<br/>            self.logger.info(&quot;********** TC_DM_12 started ********&quot;)<br/>            self.logger.info(&quot;verify_session_time_is_set_to_maximum_value_under_platform_settings&quot;)<br/>            self.status.clear()<br/>&gt;           if not DeploymentManager_Read_ini().get_register_login_link_from_register_url() == self.d.current_url:<br/><br/>All_POM_Packages\_00_Deployment_Manager_POM\Deployment_Manager_Page_POM.py:811: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:437: in current_url<br/>    return self.execute(Command.GET_CURRENT_URL)[&quot;value&quot;]<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:347: in execute<br/>    self.error_handler.check_response(response)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/><br/>self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x000001170BFA78F0&gt;<br/>response = {&#x27;status&#x27;: 404, &#x27;value&#x27;: &#x27;{&quot;value&quot;:{&quot;error&quot;:&quot;no such window&quot;,&quot;message&quot;:&quot;no such window: target window already closed\\...07FF61E2F9C24]\\n\\tBaseThreadInitThunk [0x00007FFE454E7344+20]\\n\\tRtlUserThreadStart [0x00007FFE46BA26B1+33]\\n&quot;}}&#x27;}<br/><br/>    def check_response(self, response: Dict[str, Any]) -&gt; None:<br/>        &quot;&quot;&quot;Checks that a JSON response from the WebDriver does not have an<br/>        error.<br/>    <br/>        :Args:<br/>         - response - The JSON response from the WebDriver server as a dictionary<br/>           object.<br/>    <br/>        :Raises: If the response contains an error message.<br/>        &quot;&quot;&quot;<br/>        status = response.get(&quot;status&quot;, None)<br/>        if not status or status == ErrorCode.SUCCESS:<br/>            return<br/>        value = None<br/>        message = response.get(&quot;message&quot;, &quot;&quot;)<br/>        screen: str = response.get(&quot;screen&quot;, &quot;&quot;)<br/>        stacktrace = None<br/>        if isinstance(status, int):<br/>            value_json = response.get(&quot;value&quot;, None)<br/>            if value_json and isinstance(value_json, str):<br/>                import json<br/>    <br/>                try:<br/>                    value = json.loads(value_json)<br/>                    if len(value) == 1:<br/>                        value = value[&quot;value&quot;]<br/>                    status = value.get(&quot;error&quot;, None)<br/>                    if not status:<br/>                        status = value.get(&quot;status&quot;, ErrorCode.UNKNOWN_ERROR)<br/>                        message = value.get(&quot;value&quot;) or value.get(&quot;message&quot;)<br/>                        if not isinstance(message, str):<br/>                            value = message<br/>                            message = message.get(&quot;message&quot;)<br/>                    else:<br/>                        message = value.get(&quot;message&quot;, None)<br/>                except ValueError:<br/>                    pass<br/>    <br/>        exception_class: Type[WebDriverException]<br/>        e = ErrorCode()<br/>        error_codes = [item for item in dir(e) if not item.startswith(&quot;__&quot;)]<br/>        for error_code in error_codes:<br/>            error_info = getattr(ErrorCode, error_code)<br/>            if isinstance(error_info, list) and status in error_info:<br/>                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)<br/>                break<br/>        else:<br/>            exception_class = WebDriverException<br/>    <br/>        if not value:<br/>            value = response[&quot;value&quot;]<br/>        if isinstance(value, str):<br/>            raise exception_class(value)<br/>        if message == &quot;&quot; and &quot;message&quot; in value:<br/>            message = value[&quot;message&quot;]<br/>    <br/>        screen = None  # type: ignore[assignment]<br/>        if &quot;screen&quot; in value:<br/>            screen = value[&quot;screen&quot;]<br/>    <br/>        stacktrace = None<br/>        st_value = value.get(&quot;stackTrace&quot;) or value.get(&quot;stacktrace&quot;)<br/>        if st_value:<br/>            if isinstance(st_value, str):<br/>                stacktrace = st_value.split(&quot;\n&quot;)<br/>            else:<br/>                stacktrace = []<br/>                try:<br/>                    for frame in st_value:<br/>                        line = frame.get(&quot;lineNumber&quot;, &quot;&quot;)<br/>                        file = frame.get(&quot;fileName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if line:<br/>                            file = f&quot;{file}:{line}&quot;<br/>                        meth = frame.get(&quot;methodName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if &quot;className&quot; in frame:<br/>                            meth = f&quot;{frame[&#x27;className&#x27;]}.{meth}&quot;<br/>                        msg = &quot;    at %s (%s)&quot;<br/>                        msg = msg % (meth, file)<br/>                        stacktrace.append(msg)<br/>                except TypeError:<br/>                    pass<br/>        if exception_class == UnexpectedAlertPresentException:<br/>            alert_text = None<br/>            if &quot;data&quot; in value:<br/>                alert_text = value[&quot;data&quot;].get(&quot;text&quot;)<br/>            elif &quot;alert&quot; in value:<br/>                alert_text = value[&quot;alert&quot;].get(&quot;text&quot;)<br/>            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here<br/>&gt;       raise exception_class(message, screen, stacktrace)<br/><span class="error">E       selenium.common.exceptions.NoSuchWindowException: Message: no such window: target window already closed</span><br/><span class="error">E       from unknown error: web view not found</span><br/><span class="error">E         (Session info: chrome=124.0.6367.61)</span><br/><span class="error">E       Stacktrace:</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E3970C2+63090]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E302D12]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E19EC65]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E17CA7C]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E20D687]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E222AC1]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E206D83]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D83A8]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D9441]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E79262D+4238301]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7CF78D+4488509]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E470606+953270]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E30E5DF]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3092B4]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3093EB]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E2F9C24]</span><br/><span class="error">E       	BaseThreadInitThunk [0x00007FFE454E7344+20]</span><br/><span class="error">E       	RtlUserThreadStart [0x00007FFE46BA26B1+33]</span><br/><br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:229: NoSuchWindowException<br/><br/>During handling of the above exception, another exception occurred:<br/><br/>self = &lt;test_deployment_manager_page_test_cases.Test_Deployment_Manager_Page_Test_Cases object at 0x00000117109276E0&gt;<br/><br/>    @pytest.mark.core<br/>    def test_dm_tc12(self):<br/>&gt;       if Deployment_Manager_Page_Pom().verify_session_time_is_set_to_maximum_value_under_platform_settings():<br/><br/>All_Test_Cases_Package\_00_Deployment_Manager\test_deployment_manager_page_test_cases.py:91: <br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/>All_POM_Packages\_00_Deployment_Manager_POM\Deployment_Manager_Page_POM.py:834: in verify_session_time_is_set_to_maximum_value_under_platform_settings<br/>    self.d.save_screenshot(f&quot;{self.screenshots_path}\\TC_DM_12_session_timeout_failed.png&quot;)<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:822: in save_screenshot<br/>    return self.get_screenshot_as_file(filename)<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:798: in get_screenshot_as_file<br/>    png = self.get_screenshot_as_png()<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:832: in get_screenshot_as_png<br/>    return b64decode(self.get_screenshot_as_base64().encode(&quot;ascii&quot;))<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:843: in get_screenshot_as_base64<br/>    return self.execute(Command.SCREENSHOT)[&quot;value&quot;]<br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\webdriver.py:347: in execute<br/>    self.error_handler.check_response(response)<br/>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _<br/><br/>self = &lt;selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x000001170BFA78F0&gt;<br/>response = {&#x27;status&#x27;: 404, &#x27;value&#x27;: &#x27;{&quot;value&quot;:{&quot;error&quot;:&quot;no such window&quot;,&quot;message&quot;:&quot;no such window: target window already closed\\...07FF61E2F9C24]\\n\\tBaseThreadInitThunk [0x00007FFE454E7344+20]\\n\\tRtlUserThreadStart [0x00007FFE46BA26B1+33]\\n&quot;}}&#x27;}<br/><br/>    def check_response(self, response: Dict[str, Any]) -&gt; None:<br/>        &quot;&quot;&quot;Checks that a JSON response from the WebDriver does not have an<br/>        error.<br/>    <br/>        :Args:<br/>         - response - The JSON response from the WebDriver server as a dictionary<br/>           object.<br/>    <br/>        :Raises: If the response contains an error message.<br/>        &quot;&quot;&quot;<br/>        status = response.get(&quot;status&quot;, None)<br/>        if not status or status == ErrorCode.SUCCESS:<br/>            return<br/>        value = None<br/>        message = response.get(&quot;message&quot;, &quot;&quot;)<br/>        screen: str = response.get(&quot;screen&quot;, &quot;&quot;)<br/>        stacktrace = None<br/>        if isinstance(status, int):<br/>            value_json = response.get(&quot;value&quot;, None)<br/>            if value_json and isinstance(value_json, str):<br/>                import json<br/>    <br/>                try:<br/>                    value = json.loads(value_json)<br/>                    if len(value) == 1:<br/>                        value = value[&quot;value&quot;]<br/>                    status = value.get(&quot;error&quot;, None)<br/>                    if not status:<br/>                        status = value.get(&quot;status&quot;, ErrorCode.UNKNOWN_ERROR)<br/>                        message = value.get(&quot;value&quot;) or value.get(&quot;message&quot;)<br/>                        if not isinstance(message, str):<br/>                            value = message<br/>                            message = message.get(&quot;message&quot;)<br/>                    else:<br/>                        message = value.get(&quot;message&quot;, None)<br/>                except ValueError:<br/>                    pass<br/>    <br/>        exception_class: Type[WebDriverException]<br/>        e = ErrorCode()<br/>        error_codes = [item for item in dir(e) if not item.startswith(&quot;__&quot;)]<br/>        for error_code in error_codes:<br/>            error_info = getattr(ErrorCode, error_code)<br/>            if isinstance(error_info, list) and status in error_info:<br/>                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)<br/>                break<br/>        else:<br/>            exception_class = WebDriverException<br/>    <br/>        if not value:<br/>            value = response[&quot;value&quot;]<br/>        if isinstance(value, str):<br/>            raise exception_class(value)<br/>        if message == &quot;&quot; and &quot;message&quot; in value:<br/>            message = value[&quot;message&quot;]<br/>    <br/>        screen = None  # type: ignore[assignment]<br/>        if &quot;screen&quot; in value:<br/>            screen = value[&quot;screen&quot;]<br/>    <br/>        stacktrace = None<br/>        st_value = value.get(&quot;stackTrace&quot;) or value.get(&quot;stacktrace&quot;)<br/>        if st_value:<br/>            if isinstance(st_value, str):<br/>                stacktrace = st_value.split(&quot;\n&quot;)<br/>            else:<br/>                stacktrace = []<br/>                try:<br/>                    for frame in st_value:<br/>                        line = frame.get(&quot;lineNumber&quot;, &quot;&quot;)<br/>                        file = frame.get(&quot;fileName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if line:<br/>                            file = f&quot;{file}:{line}&quot;<br/>                        meth = frame.get(&quot;methodName&quot;, &quot;&lt;anonymous&gt;&quot;)<br/>                        if &quot;className&quot; in frame:<br/>                            meth = f&quot;{frame[&#x27;className&#x27;]}.{meth}&quot;<br/>                        msg = &quot;    at %s (%s)&quot;<br/>                        msg = msg % (meth, file)<br/>                        stacktrace.append(msg)<br/>                except TypeError:<br/>                    pass<br/>        if exception_class == UnexpectedAlertPresentException:<br/>            alert_text = None<br/>            if &quot;data&quot; in value:<br/>                alert_text = value[&quot;data&quot;].get(&quot;text&quot;)<br/>            elif &quot;alert&quot; in value:<br/>                alert_text = value[&quot;alert&quot;].get(&quot;text&quot;)<br/>            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here<br/>&gt;       raise exception_class(message, screen, stacktrace)<br/><span class="error">E       selenium.common.exceptions.NoSuchWindowException: Message: no such window: target window already closed</span><br/><span class="error">E       from unknown error: web view not found</span><br/><span class="error">E         (Session info: chrome=124.0.6367.61)</span><br/><span class="error">E       Stacktrace:</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E3970C2+63090]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E302D12]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E19EC65]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E17CA7C]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E20D687]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E222AC1]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E206D83]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D83A8]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E1D9441]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E79262D+4238301]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7CF78D+4488509]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E7C7A6F+4456479]</span><br/><span class="error">E       	GetHandleVerifier [0x00007FF61E470606+953270]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E30E5DF]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3092B4]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E3093EB]</span><br/><span class="error">E       	(No symbol) [0x00007FF61E2F9C24]</span><br/><span class="error">E       	BaseThreadInitThunk [0x00007FFE454E7344+20]</span><br/><span class="error">E       	RtlUserThreadStart [0x00007FFE46BA26B1+33]</span><br/><br/>C:\Python Install\Lib\site-packages\selenium\webdriver\remote\errorhandler.py:229: NoSuchWindowException<br/> ------------------------------Captured stdout call------------------------------ <br/>INI Data File Path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\All_Test_Data\00_Deployment_Manager_Data\Data_From_INI\dm_data.ini
+Register login link from register page url:  https://localhost:5000/login?from=register
+<br/> -------------------------------Captured log call-------------------------------- <br/>INFO     root:Deployment_Manager_Page_POM.py:808 ********** TC_DM_12 started ********
+INFO     root:Deployment_Manager_Page_POM.py:809 verify_session_time_is_set_to_maximum_value_under_platform_settings
+ERROR    root:Deployment_Manager_Page_POM.py:833 screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Smoke_Test\Reports\Screenshots\TC_DM_12_session_timeout_failed.png<br/></div></td></tr></tbody></table></body></html>

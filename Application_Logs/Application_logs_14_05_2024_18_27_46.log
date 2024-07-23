@@ -1,0 +1,141 @@
+14/05/2024 06:27:47 PM : selenium.webdriver.common.selenium_manager : WARNING  : The chromedriver version (123.0.6312.86) detected in PATH at C:\Python Install\Lib\site-packages\seleniumbase\drivers\chromedriver.exe might not be compatible with the detected chrome version (124.0.6367.202); currently, chromedriver 124.0.6367.207 is recommended for chrome 124.*, so it is advised to delete the driver in PATH and retry
+14/05/2024 06:27:48 PM : root         : INFO     :  ******** Portal_Smoke_Test_Cases Begin ********
+14/05/2024 06:27:48 PM : root         : INFO     : ********** Test_NG_TC01 Begin  **********
+14/05/2024 06:27:57 PM : root         : INFO     : current url: https://scecore5-vm.qa.facefirst.dev/
+14/05/2024 06:27:57 PM : root         : INFO     : url is not open
+14/05/2024 06:27:57 PM : root         : INFO     : opening localhost portal login
+14/05/2024 06:27:57 PM : root         : INFO     : logging in to core
+14/05/2024 06:27:57 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:27:58 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:28:00 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:28:00 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:28:02 PM : root         : INFO     : login success..
+14/05/2024 06:28:05 PM : root         : INFO     : notification Groups List: ['son', 'abn', 'ptn', 'fraudn', 'vipn']
+14/05/2024 06:28:06 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:28:06 PM : root         : INFO     : exiting explicit wait..
+14/05/2024 06:28:06 PM : root         : INFO     : notification groups btn is clicked
+14/05/2024 06:28:07 PM : root         : INFO     : enlisted groups count: 6
+14/05/2024 06:28:07 PM : root         : INFO     : ng list: ['abn', 'DefaultAlertGroup', 'fraudn', 'ptn', 'son', 'vipn']
+14/05/2024 06:28:08 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:28:18 PM : root         : INFO     : element not found: //p[@class="posrel disblk fltlft" and text()='Notification Groups']
+14/05/2024 06:28:18 PM : root         : INFO     : opening notification module got an exception as: Message: javascript error: Cannot read properties of null (reading 'click')
+  (Session info: chrome=124.0.6367.202)
+Stacktrace:
+	GetHandleVerifier [0x00007FF73D3D70C2+63090]
+	(No symbol) [0x00007FF73D342D12]
+	(No symbol) [0x00007FF73D1DEC65]
+	(No symbol) [0x00007FF73D1E3D21]
+	(No symbol) [0x00007FF73D1E6462]
+	(No symbol) [0x00007FF73D264062]
+	(No symbol) [0x00007FF73D246FDA]
+	(No symbol) [0x00007FF73D263412]
+	(No symbol) [0x00007FF73D246D83]
+	(No symbol) [0x00007FF73D2183A8]
+	(No symbol) [0x00007FF73D219441]
+	GetHandleVerifier [0x00007FF73D7D262D+4238301]
+	GetHandleVerifier [0x00007FF73D80F78D+4488509]
+	GetHandleVerifier [0x00007FF73D807A6F+4456479]
+	GetHandleVerifier [0x00007FF73D4B0606+953270]
+	(No symbol) [0x00007FF73D34E5DF]
+	(No symbol) [0x00007FF73D3492B4]
+	(No symbol) [0x00007FF73D3493EB]
+	(No symbol) [0x00007FF73D339C24]
+	BaseThreadInitThunk [0x00007FFCD3D77344+20]
+	RtlUserThreadStart [0x00007FFCD54826B1+33]
+
+14/05/2024 06:28:18 PM : root         : INFO     : enlisted groups count: 6
+14/05/2024 06:28:18 PM : root         : INFO     : ng list: ['abn', 'DefaultAlertGroup', 'fraudn', 'ptn', 'son', 'vipn']
+14/05/2024 06:28:19 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:28:30 PM : root         : INFO     : element not found: //p[@class="posrel disblk fltlft" and text()='Notification Groups']
+14/05/2024 06:28:30 PM : root         : INFO     : opening notification module got an exception as: Message: javascript error: Cannot read properties of null (reading 'click')
+  (Session info: chrome=124.0.6367.202)
+Stacktrace:
+	GetHandleVerifier [0x00007FF73D3D70C2+63090]
+	(No symbol) [0x00007FF73D342D12]
+	(No symbol) [0x00007FF73D1DEC65]
+	(No symbol) [0x00007FF73D1E3D21]
+	(No symbol) [0x00007FF73D1E6462]
+	(No symbol) [0x00007FF73D264062]
+	(No symbol) [0x00007FF73D246FDA]
+	(No symbol) [0x00007FF73D263412]
+	(No symbol) [0x00007FF73D246D83]
+	(No symbol) [0x00007FF73D2183A8]
+	(No symbol) [0x00007FF73D219441]
+	GetHandleVerifier [0x00007FF73D7D262D+4238301]
+	GetHandleVerifier [0x00007FF73D80F78D+4488509]
+	GetHandleVerifier [0x00007FF73D807A6F+4456479]
+	GetHandleVerifier [0x00007FF73D4B0606+953270]
+	(No symbol) [0x00007FF73D34E5DF]
+	(No symbol) [0x00007FF73D3492B4]
+	(No symbol) [0x00007FF73D3493EB]
+	(No symbol) [0x00007FF73D339C24]
+	BaseThreadInitThunk [0x00007FFCD3D77344+20]
+	RtlUserThreadStart [0x00007FFCD54826B1+33]
+
+14/05/2024 06:28:30 PM : root         : INFO     : enlisted groups count: 6
+14/05/2024 06:28:30 PM : root         : INFO     : ng list: ['abn', 'DefaultAlertGroup', 'fraudn', 'ptn', 'son', 'vipn']
+14/05/2024 06:28:31 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:28:41 PM : root         : INFO     : element not found: //p[@class="posrel disblk fltlft" and text()='Notification Groups']
+14/05/2024 06:28:41 PM : root         : INFO     : opening notification module got an exception as: Message: javascript error: Cannot read properties of null (reading 'click')
+  (Session info: chrome=124.0.6367.202)
+Stacktrace:
+	GetHandleVerifier [0x00007FF73D3D70C2+63090]
+	(No symbol) [0x00007FF73D342D12]
+	(No symbol) [0x00007FF73D1DEC65]
+	(No symbol) [0x00007FF73D1E3D21]
+	(No symbol) [0x00007FF73D1E6462]
+	(No symbol) [0x00007FF73D264062]
+	(No symbol) [0x00007FF73D246FDA]
+	(No symbol) [0x00007FF73D263412]
+	(No symbol) [0x00007FF73D246D83]
+	(No symbol) [0x00007FF73D2183A8]
+	(No symbol) [0x00007FF73D219441]
+	GetHandleVerifier [0x00007FF73D7D262D+4238301]
+	GetHandleVerifier [0x00007FF73D80F78D+4488509]
+	GetHandleVerifier [0x00007FF73D807A6F+4456479]
+	GetHandleVerifier [0x00007FF73D4B0606+953270]
+	(No symbol) [0x00007FF73D34E5DF]
+	(No symbol) [0x00007FF73D3492B4]
+	(No symbol) [0x00007FF73D3493EB]
+	(No symbol) [0x00007FF73D339C24]
+	BaseThreadInitThunk [0x00007FFCD3D77344+20]
+	RtlUserThreadStart [0x00007FFCD54826B1+33]
+
+14/05/2024 06:28:41 PM : root         : INFO     : enlisted groups count: 6
+14/05/2024 06:28:41 PM : root         : INFO     : ng list: ['abn', 'DefaultAlertGroup', 'fraudn', 'ptn', 'son', 'vipn']
+14/05/2024 06:28:42 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:28:53 PM : root         : INFO     : element not found: //p[@class="posrel disblk fltlft" and text()='Notification Groups']
+14/05/2024 06:28:53 PM : root         : INFO     : opening notification module got an exception as: Message: javascript error: Cannot read properties of null (reading 'click')
+  (Session info: chrome=124.0.6367.202)
+Stacktrace:
+	GetHandleVerifier [0x00007FF73D3D70C2+63090]
+	(No symbol) [0x00007FF73D342D12]
+	(No symbol) [0x00007FF73D1DEC65]
+	(No symbol) [0x00007FF73D1E3D21]
+	(No symbol) [0x00007FF73D1E6462]
+	(No symbol) [0x00007FF73D264062]
+	(No symbol) [0x00007FF73D246FDA]
+	(No symbol) [0x00007FF73D263412]
+	(No symbol) [0x00007FF73D246D83]
+	(No symbol) [0x00007FF73D2183A8]
+	(No symbol) [0x00007FF73D219441]
+	GetHandleVerifier [0x00007FF73D7D262D+4238301]
+	GetHandleVerifier [0x00007FF73D80F78D+4488509]
+	GetHandleVerifier [0x00007FF73D807A6F+4456479]
+	GetHandleVerifier [0x00007FF73D4B0606+953270]
+	(No symbol) [0x00007FF73D34E5DF]
+	(No symbol) [0x00007FF73D3492B4]
+	(No symbol) [0x00007FF73D3493EB]
+	(No symbol) [0x00007FF73D339C24]
+	BaseThreadInitThunk [0x00007FFCD3D77344+20]
+	RtlUserThreadStart [0x00007FFCD54826B1+33]
+
+14/05/2024 06:28:53 PM : root         : INFO     : enlisted groups count: 6
+14/05/2024 06:28:53 PM : root         : INFO     : ng list: ['abn', 'DefaultAlertGroup', 'fraudn', 'ptn', 'son', 'vipn']
+14/05/2024 06:28:53 PM : root         : INFO     : username list: ['operator', 'responder', 'approver', 'executive', 'it admin']
+14/05/2024 06:28:53 PM : root         : INFO     : ng list: ['son', 'abn', 'ptn', 'fraudn', 'vipn']
+14/05/2024 06:28:53 PM : root         : INFO     : eg list: ['soe', 'abe', 'pte', 'fraude', 'vipe']
+14/05/2024 06:28:53 PM : root         : INFO     : entered explicit wait for 10
+14/05/2024 06:29:03 PM : root         : INFO     : element not found: //p[@ng-bind="::('Users' | i18n )"]
+14/05/2024 06:29:03 PM : root         : ERROR    : screenshot file path: C:\Users\ShivajiWankhede\Desktop\FF_Migration_Smoke_Test\Reports\Screenshots\TC_NG_01_exception.png
+14/05/2024 06:29:03 PM : root         : ERROR    : TC_NG_01 got exception as: ("'NoneType' object has no attribute 'click'",)
