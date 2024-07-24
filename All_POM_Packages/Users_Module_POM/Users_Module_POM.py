@@ -1352,6 +1352,8 @@ class Users_Module_pom(web_driver, web_logger):
         :return:
         """
         user_role_ele = self.d.find_element(By.XPATH, Read_Users_Components().user_role_by_xpath())
+        # if user_role_ele.is_displayed():
+        #     user_role_ele.click()
         select_options_visible_text(user_role_ele, role_data_text)
         self.logger.info(f"Select user role : {role_data_text.upper()}")
 

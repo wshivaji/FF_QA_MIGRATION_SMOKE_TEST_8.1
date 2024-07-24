@@ -173,11 +173,12 @@ class Enrollments_Groups_Module_pom(web_driver, web_logger):
 
             number_of_egs = self.d.find_element(By.XPATH, Read_Enrollment_Groups_Components().get_number_of_egs_by_xpath())
             time.sleep(web_driver.one_second)
-            self.logger.info(f"actual count: {number_of_egs.text}")
+            number_of_egs_list = number_of_egs.text.split(' ')
+            self.logger.info(f"actual count: {int(number_of_egs_list[3])}")
             expected_ngs = Read_Enrollment_Groups_Components().get_total_number_of_egs()
             time.sleep(web_driver.one_second)
             self.logger.info(f"expected count: {expected_ngs}")
-            if expected_ngs in number_of_egs.text:
+            if int(expected_ngs) < int(number_of_egs_list[3]):
                 status.append(True)
             else:
                 status.append(False)

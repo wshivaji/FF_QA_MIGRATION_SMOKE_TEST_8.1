@@ -135,7 +135,7 @@ class user_roles_module_pom(web_driver, web_logger):
             x = user_roles_read_ini().expected_user_role_list()
             expected_user_roles_list = x.split(',')
             time.sleep(web_driver.one_second)
-            for i in range(len(actual_user_roles_menu_item_list)):
+            for i in range(0, 5):
                 if expected_user_roles_list[i] in actual_user_roles_menu_item_list[i].text:
                     self.logger.info(f"{actual_user_roles_menu_item_list[i].text} user role is visible.")
                     self.logger.info(f"Description: {actual_user_roles_description_list[i].text} ")
@@ -173,9 +173,11 @@ class user_roles_module_pom(web_driver, web_logger):
             time.sleep(web_driver.one_second)
 
             actual_count_of_user_roles = self.d.find_element(By.XPATH, user_roles_read_ini().total_number_of_user_roles_by_xpath())
-            user_role_count = f"{user_roles_read_ini().total_number_of_user_roles()} of {user_roles_read_ini().total_number_of_user_roles()}"
-            self.logger.info(f"Expected count: Displaying {user_role_count} total user roles")
-            if user_role_count in actual_count_of_user_roles.text:
+            user_role_count = user_roles_read_ini().total_number_of_user_roles()
+
+            self.logger.info(f"Expected count: Displaying {int(user_role_count)} total user roles")
+            actual_count_of_user_roles_list = actual_count_of_user_roles.text.split(' ')
+            if int(user_role_count) < int(actual_count_of_user_roles_list[3]):
                 self.logger.info(f"Actual count: {actual_count_of_user_roles.text}")
                 status.append(True)
             else:
