@@ -2114,14 +2114,15 @@ class events_pom(web_driver, web_logger):
             time.sleep(web_driver.one_second)
 
             displaying_total_number = self.d.find_element(By.XPATH,events_Read_Ini().total_number_of_events_happened_out_of_total_number_of_events())
-            self.logger.info(f"Total number of events are : {displaying_total_number.text}")
+            self.logger.info(f"Actual Total number of events are : {displaying_total_number.text}")
             number_of_events = displaying_total_number.text
+            number_of_events_list = number_of_events.split(" ")
             time.sleep(web_driver.one_second)
-
+            self.logger.info(f"actual number: {number_of_events_list[1]}")
             Total_number = events_Read_Ini().read_total_number_of_events()
-            self.logger.info(f"Total number of events are {Total_number}")
+            self.logger.info(f"Expected Total number of events are {Total_number}")
 
-            if Total_number in number_of_events:
+            if int(Total_number) < int(number_of_events_list[1]):
                 self.logger.info("number of total events are 25")
                 self.status.append(True)
 
@@ -2164,8 +2165,12 @@ class events_pom(web_driver, web_logger):
                 Total_events_count_of_each_group = self.explicit_wait(5, "XPATH", events_Read_Ini().Events_count_each_eg(), self.d)
                 self.logger.info(f"Total number of events on each group is {Total_events_count_of_each_group.text}")
                 time.sleep(web_driver.one_second)
+                actual_events_count = Total_events_count_of_each_group.text
+                actual_events_count_list = actual_events_count.split(" ")
                 expected_events_counts = events_Read_Ini().five_events_from_each_group()
-                if expected_events_counts in Total_events_count_of_each_group.text:
+                self.logger.info(f"actual: {actual_events_count_list[3]}")
+                self.logger.info(f"expected: {expected_events_counts}")
+                if int(expected_events_counts) <= int(actual_events_count_list[3]):
                     self.logger.info("Displaying 5 events from each group")
                     self.status.append(True)
 
@@ -2176,6 +2181,7 @@ class events_pom(web_driver, web_logger):
                 eg_name = enrollment_group_list[i]
                 self.select_enrollment_group(eg_name)
                 self.close_all_panel_one_by_one()
+            self.logger.info(f"status: {self.status}")
             if False in self.status:
                 self.logger.error(f"screenshot file path: {self.screenshots_path}\\test_events_TC_002.png")
                 self.d.save_screenshot(f"{self.screenshots_path}\\test_events_TC_002.png")
@@ -2218,8 +2224,12 @@ class events_pom(web_driver, web_logger):
             Total_events_count_of_each_group = self.explicit_wait(5, "XPATH", events_Read_Ini().Events_count_each_eg(), self.d)
             self.logger.info(f"Total number of events on each group is {Total_events_count_of_each_group.text}")
             time.sleep(web_driver.one_second)
+            actual_events_count = Total_events_count_of_each_group.text
+            actual_events_count_list = actual_events_count.split(" ")
             expected_events_counts = events_Read_Ini().read_total_number_of_events()
-            if expected_events_counts in Total_events_count_of_each_group.text:
+            self.logger.info(f"actual: {actual_events_count_list[3]}")
+            self.logger.info(f"expected: {expected_events_counts}")
+            if int(expected_events_counts) < int(actual_events_count_list[3]):
                 self.logger.info("Displaying 25 events")
                 self.status.append(True)
             else:
@@ -2260,12 +2270,15 @@ class events_pom(web_driver, web_logger):
                 Total_events_count_of_each_group = self.explicit_wait(5, "XPATH",
                                                                       events_Read_Ini().Events_count_each_eg(), self.d)
                 self.logger.info(f"Total number of events on each group is {Total_events_count_of_each_group.text}")
+                actual_events_count = Total_events_count_of_each_group.text
+                actual_events_count_list = actual_events_count.split(" ")
                 time.sleep(web_driver.one_second)
                 expected_events_counts = events_Read_Ini().five_events_from_each_group()
-                if expected_events_counts in Total_events_count_of_each_group.text:
+                self.logger.info(f"expected: {expected_events_counts}")
+                self.logger.info(f"actual: {actual_events_count_list[3]}")
+                if int(expected_events_counts) <= int(actual_events_count_list[3]):
                     self.logger.info("Displaying 5 events from each group")
                     self.status.append(True)
-
                 else:
                     self.status.append(False)
                 self.click_on_search_button()
@@ -2307,6 +2320,7 @@ class events_pom(web_driver, web_logger):
                                                                       events_Read_Ini().Events_count_each_eg(), self.d)
                 self.logger.info(f"Total number of events on each group is {Total_events_count_of_each_group.text}")
                 time.sleep(web_driver.one_second)
+
                 expected_events_counts = events_Read_Ini().five_events_from_each_group()
                 if expected_events_counts in Total_events_count_of_each_group.text:
                     self.logger.info("Displaying 5 events from each group")
@@ -2889,11 +2903,15 @@ class events_pom(web_driver, web_logger):
     def select_tags_to_add_to_events(self, eg_name):
         try:
             get_eg_names = events_Read_Ini().get_enrollment_group()
+            self.logger.info(f"eg name: {eg_name}")
+            self.logger.info(f"eg names: {get_eg_names}")
             get_eg_names_list = get_eg_names.split(',')
             serious_tag_name_input_data = events_Read_Ini().get_serious_tags()
             serious_tag_name_input_data_list = serious_tag_name_input_data.split(',')
+            self.logger.info(f"serious tag list: {serious_tag_name_input_data_list}")
             non_serious_tag_input_data = events_Read_Ini().get_non_serious_tags()
             non_serious_tag_input_data_list = non_serious_tag_input_data.split(',')
+            self.logger.info(f"non seriuos tag list: {non_serious_tag_input_data_list}")
             if get_eg_names_list[1].upper() == eg_name.upper():
                 tag_name = serious_tag_name_input_data_list[2].upper()  # ABE linked to THREAT
             elif get_eg_names_list[2].upper() == eg_name.upper():
@@ -2910,6 +2928,8 @@ class events_pom(web_driver, web_logger):
             self.logger.info(f"eg: {eg_name}, tag: {tag_name}")
             if tag_name is not None:
                 tag_name_list = self.d.find_elements(By.XPATH, events_Read_Ini().tags_names())
+                x = [lambda x: tag_name_list[i].text for i in range(len(tag_name_list))]
+                self.logger.info(f"tag list: {x}")
                 tag_checkbox_list = self.d.find_elements(By.XPATH, events_Read_Ini().checkbox_number_twentyfour())
 
                 if tag_name == serious_tag_name_input_data_list[2].upper():

@@ -1137,4 +1137,9 @@ class Read_Visitor_Search_jobs_Components:
         except Exception as ex:
             print("end_date_calender_box_by_xpath : ", ex)
 
-
+    def test_SM_TC033_file_path(self):
+        try:
+            test_SM_TC033_file_path = self.common_test_data_config.get("common_data", "test_SM_TC033_file_path")
+            return test_SM_TC033_file_path
+        except Exception as ex:
+            print("end_age_data_input : ", ex)

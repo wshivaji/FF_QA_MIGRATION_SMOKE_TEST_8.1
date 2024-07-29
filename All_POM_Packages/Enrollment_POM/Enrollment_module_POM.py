@@ -81,7 +81,7 @@ class enrollments_POM(web_driver, web_logger):
             upload_photo.click()
             self.logger.info(f"clicked on upload image icon")
             time.sleep(2)
-            file_path = f"{Path(__file__).parent.parent.parent}\\All_Test_Data\\Common_Test_data\\dataset2\\disabled.png"
+            file_path = f"{Path(__file__).parent.parent.parent}{Read_Identify_and_Enroll_Components().test_sm_tc_072_unenrolled_masked_image()}"
             pyautogui.write(file_path)
             pyautogui.press('enter')
             time.sleep(2)
@@ -439,6 +439,7 @@ class enrollments_POM(web_driver, web_logger):
     def Verify_user_is_able_to_see_5_subjects_for_pending_review_condition_using_VIP_user_enroll_5_subjects_for_pending_review(self):
         try:
             self.logger.info("Enrollment_tc_05 started")
+            login().login_to_cloud_if_not_done_with_user_credentials(self.d, Read_Identify_and_Enroll_Components().get_operator_to_login(), Read_Identify_and_Enroll_Components().get_password_to_login())
             self.status.clear()
             Identify_And_Enroll_POM().enroll_5_images("pending")
             Identify_And_Enroll_POM().click_on_logout_button()
@@ -1670,7 +1671,7 @@ class enrollments_POM(web_driver, web_logger):
             upload_photo.click()
             self.logger.info(f"clicked on upload image icon")
             time.sleep(2)
-            file_path = f"{Path(__file__).parent.parent.parent}\\All_Test_Data\\Common_Test_data\\dataset2\\disabled1.png"
+            file_path = f"{Path(__file__).parent.parent.parent}{Read_Identify_and_Enroll_Components().test_sm_tc_139_unenrolled_masked_image()}"
             pyautogui.write(file_path)
             pyautogui.press('enter')
             time.sleep(2)

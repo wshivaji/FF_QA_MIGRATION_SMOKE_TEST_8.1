@@ -2727,6 +2727,30 @@ class Read_Identify_and_Enroll_Components:
         except Exception as ex:
             print(ex.args)
 
+    def ie_file_path(self):
+        try:
+            ie_file_path = self.common_test_data_config.get("common_data", "ie_file_path")
+            return ie_file_path
+        except Exception as ex:
+            print("crop_photo_btn_below_text : ", ex)
 
+    def test_sm_tc_072_unenrolled_masked_image(self):
+        try:
+            test_sm_tc_072_unenrolled_masked_image = self.common_test_data_config.get("common_data", "test_sm_tc_072_unenrolled_masked_image")
+            return test_sm_tc_072_unenrolled_masked_image
+        except Exception as ex:
+            print("crop_photo_btn_below_text : ", ex)
 
+    def test_sm_tc_139_unenrolled_masked_image(self):
+        try:
+            test_sm_tc_139_unenrolled_masked_image = self.common_test_data_config.get("common_data", "test_sm_tc_139_unenrolled_masked_image")
+            return test_sm_tc_139_unenrolled_masked_image
+        except Exception as ex:
+            print("crop_photo_btn_below_text : ", ex)
 
+    def test_sm_tc_159_enrolled_image(self):
+        try:
+            test_sm_tc_159_enrolled_image = self.common_test_data_config.get("common_data", "test_sm_tc_159_enrolled_image")
+            return test_sm_tc_159_enrolled_image
+        except Exception as ex:
+            print("crop_photo_btn_below_text : ", ex)

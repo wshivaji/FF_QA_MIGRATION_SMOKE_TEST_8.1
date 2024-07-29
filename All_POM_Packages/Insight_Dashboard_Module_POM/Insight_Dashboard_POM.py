@@ -984,8 +984,8 @@ class insight_dashboard_pom(web_driver, web_logger):
                     x.append(True)
                 else:
                     x.append(False)
-            self.logger.info(f"total_enrollments_count from ini: {insight_dashboard_read_ini().total_enrollments_count()}")
-            if total_enrollments == insight_dashboard_read_ini().total_enrollments_count():
+            self.logger.info(f"total_enrollments_count from ini: {insight_dashboard_read_ini().total_enrollments_count_for_selected_eg()}")
+            if int(total_enrollments) == int(insight_dashboard_read_ini().total_enrollments_count_for_selected_eg()):
                 x.append(True)
             else:
                 x.append(False)
@@ -1017,7 +1017,8 @@ class insight_dashboard_pom(web_driver, web_logger):
                     x.append(True)
                 else:
                     x.append(False)
-            if total_facefirst_count == insight_dashboard_read_ini().total_enrollments_count():
+            self.logger.info(f"expected: {insight_dashboard_read_ini().total_enrollments_count_for_selected_eg()}")
+            if int(total_facefirst_count) == int(insight_dashboard_read_ini().total_enrollments_count_for_selected_eg()):
                 x.append(True)
             else:
                 x.append(False)
@@ -1049,8 +1050,8 @@ class insight_dashboard_pom(web_driver, web_logger):
                     x.append(True)
                 else:
                     x.append(False)
-            self.logger.info(f"events from ini: {insight_dashboard_read_ini().total_events_count()}")
-            if total_match_events_count.text == insight_dashboard_read_ini().total_events_count():
+            self.logger.info(f"events from ini: {insight_dashboard_read_ini().total_events_count_for_each_eg()}")
+            if int(total_match_events_count.text) == int(insight_dashboard_read_ini().total_events_count_for_each_eg()):
                 x.append(True)
             else:
                 x.append(False)
@@ -1083,6 +1084,7 @@ class insight_dashboard_pom(web_driver, web_logger):
                     x.append(True)
                 else:
                     x.append(False)
+            self.logger.info(f"expected: {insight_dashboard_read_ini().total_visitor_search_count()}")
             if visitor_search_count_actual == insight_dashboard_read_ini().total_visitor_search_count():
                 x.append(True)
             else:

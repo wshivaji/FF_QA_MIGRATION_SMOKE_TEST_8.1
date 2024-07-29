@@ -401,8 +401,7 @@ class Test_Portal_Smoke_Test_Cases(web_driver, web_logger):
 
     @pytest.mark.system
     def test_SM_TC044(self):
-        if (insight_dashboard_pom().
-                Verify_user_is_able_to_see_counts_on_overview_dashboard_organisation_and_individual_groups()):
+        if insight_dashboard_pom().Verify_user_is_able_to_see_counts_on_overview_dashboard_organisation_and_individual_groups():
             assert True
         else:
             assert False
@@ -844,32 +843,28 @@ class Test_Portal_Smoke_Test_Cases(web_driver, web_logger):
 
     @pytest.mark.system
     def test_SM_TC105(self):
-        if Users_Module_pom() \
-                .verify_login_with_newly_created_user_and_validate_login_successful():
+        if Users_Module_pom().verify_login_with_newly_created_user_and_validate_login_successful():
             assert True
         else:
             assert False
 
     @pytest.mark.system
     def test_SM_TC106(self):
-        if Users_Module_pom() \
-                .verify_user_should_not_be_able_to_create_user_which_already_exist():
+        if Users_Module_pom().verify_user_should_not_be_able_to_create_user_which_already_exist():
             assert True
         else:
             assert False
 
     @pytest.mark.system
     def test_SM_TC107(self):
-        if Users_Module_pom() \
-                .on_alert_schedule_edit_user_alert_schedule_and_verify_the_panel_should_be_editable():
+        if Users_Module_pom().on_alert_schedule_edit_user_alert_schedule_and_verify_the_panel_should_be_editable():
             assert True
         else:
             assert False
 
     @pytest.mark.system
     def test_SM_TC108(self):
-        if Users_Module_pom() \
-                .verify_send_sms_send_mms_send_email_send_in_app_notifications_enable_disable_alerts_Yes_No_button():
+        if Users_Module_pom().verify_send_sms_send_mms_send_email_send_in_app_notifications_enable_disable_alerts_Yes_No_button():
             assert True
         else:
             assert False

@@ -1282,12 +1282,20 @@ class Users_Module_pom(web_driver, web_logger):
         """
         clicks on save button
         """
-        # save = self.d.find_element(By.XPATH, Read_Users_Components().user_panel_save_button_by_xpath())
-        save = web_driver.explicit_wait(self, 5, "XPATH", Read_Users_Components().user_panel_save_button_by_xpath(),
-                                        self.d)
-        # save.click()
-        javascript_executor_click(save)
-        self.logger.info("click on save button")
+        try:
+            # save = self.d.find_element(By.XPATH, Read_Users_Components().user_panel_save_button_by_xpath())
+            save = web_driver.explicit_wait(self, 5, "XPATH", Read_Users_Components().user_panel_save_button_by_xpath(),
+                                            self.d)
+            # save.click()
+            if save.is_displayed():
+                self.logger.info(f"save button displayed: {save.is_displayed()}")
+            else:
+                self.logger.info(f"save button displayed: {save.is_displayed()}")
+            javascript_executor_click(save)
+            self.logger.info("click on save button")
+
+        except Exception as ex:
+            print(ex.args)
 
     def click_on_cancel_btn(self):
         """

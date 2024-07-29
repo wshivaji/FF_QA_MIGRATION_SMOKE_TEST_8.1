@@ -638,7 +638,7 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
             self.d.execute_script("arguments[0].click();", link)
             self.logger.info(f"clicked on Identify and enroll link")
             time.sleep(web_driver.one_second)
-            file_path = f"{self.ie_file_path}\\ab\\1821_20220526-124517.png"
+            file_path = f"{self.ie_file_path}{Read_Identify_and_Enroll_Components().test_sm_tc_159_enrolled_image()}"
             self.upload_image(file_path)
 
             identify_enroll_btn = self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components()
@@ -925,7 +925,7 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
 
     def get_img_file_list(self, folder_name):
         try:
-            img_folder = f"{self.ie_file_path}\\{folder_name}"
+            img_folder = f"{Path(__file__).parent.parent.parent}{Read_Identify_and_Enroll_Components().ie_file_path()}\\{folder_name}"
             print(img_folder)
             files_list = os.listdir(img_folder)
             base_path = Path(img_folder)
@@ -996,7 +996,7 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
                 self.logger.info(f"clicked on Identify and enroll link")
                 time.sleep(web_driver.one_second)
 
-                file_path = f"{self.ie_file_path}\\{folder_name}\\{image}"
+                file_path = f"{Path(__file__).parent.parent.parent}{Read_Identify_and_Enroll_Components().ie_file_path()}\\{folder_name}\\{image}"
                 self.upload_image(file_path)
 
                 self.logger.info(f"Image upload success")
@@ -1904,7 +1904,7 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
                                       .identify_and_enroll_link_by_xpath(), self.d)
             self.d.execute_script("arguments[0].click();", link)
             self.logger.info(f"clicked on Identify and enroll link")
-            file_path = f"{self.ie_file_path}\\ab\\1821_20220526-124517.png"
+            file_path = f"{self.ie_file_path}{Read_Identify_and_Enroll_Components().test_sm_tc_159_enrolled_image()}"
             self.upload_image(file_path)
 
             identify_enroll_btn = self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components()

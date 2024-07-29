@@ -1026,3 +1026,11 @@ class Read_Visitor_Search_Components:
         except Exception as ex:
             print("get_end_date_calender_box_by_xpath : ", ex)
 
+    def test_SM_TC030_file_path(self):
+        test_SM_TC030_file_path = self.common_test_data_config.get("common_data", "test_SM_TC030_file_path")
+        return test_SM_TC030_file_path
+
+    def test_SM_TC031_file_path(self):
+        test_SM_TC031_file_path = self.common_test_data_config.get("common_data", "test_SM_TC031_file_path")
+        return test_SM_TC031_file_path
+
