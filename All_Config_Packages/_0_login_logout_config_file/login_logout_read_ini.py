@@ -1,4 +1,5 @@
 # from Base_Package.Web_Logger import web_logger
+import datetime
 from pathlib import Path
 import configparser
 # from selenium.webdriver.common.by import By
@@ -64,4 +65,48 @@ class LoginLogout_Read_ini:
         except Exception as ex:
             print(ex)
 
+    def set_vs_and_vsj_date_time(self):
+        try:
+            now = datetime.datetime.now()
+            print(f"Year: {now.strftime("%Y")}")
+            print(f"month: {now.strftime("%B")}")
+            print(f"day: {now.strftime("%d")}")
+            print(f"HRs: {now.strftime("%I")}")
+            print(f"Minute: {now.strftime("%M")}")
+            print(f"Minute: {int(now.strftime("%M"))-20}")
+            print(f"am/pm: {now.strftime("%p")}")
+            self.common_test_data_config.set("common_data", "start_date", f"{now.strftime("%d")}")
+            self.common_test_data_config.set("common_data", "end_date", f"{now.strftime("%d")}")
+            self.common_test_data_config.set("common_data", "meta_data_start_date", f"{now.strftime("%d")}")
+            self.common_test_data_config.set("common_data", "meta_data_end_date", f"{now.strftime("%d")}")
+
+            self.common_test_data_config.set("common_data", "start_month", f"{now.strftime("%B")}")
+            self.common_test_data_config.set("common_data", "end_month", f"{now.strftime("%B")}")
+            self.common_test_data_config.set("common_data", "meta_data_start_month", f"{now.strftime("%B")}")
+            self.common_test_data_config.set("common_data", "meta_data_end_month", f"{now.strftime("%B")}")
+
+            self.common_test_data_config.set("common_data", "start_year", f"{now.strftime("%Y")}")
+            self.common_test_data_config.set("common_data", "end_year", f"{now.strftime("%Y")}")
+            self.common_test_data_config.set("common_data", "meta_data_start_year", f"{now.strftime("%Y")}")
+            self.common_test_data_config.set("common_data", "meta_data_end_year", f"{now.strftime("%Y")}")
+
+            self.common_test_data_config.set("common_data", "start_hour", f"{now.strftime("%I")}")
+            self.common_test_data_config.set("common_data", "end_hour", f"{now.strftime("%I")}")
+            self.common_test_data_config.set("common_data", "meta_data_start_hour", f"{now.strftime("%I")}")
+            self.common_test_data_config.set("common_data", "meta_data_end_hour", f"{now.strftime("%I")}")
+
+            self.common_test_data_config.set("common_data", "start_minute", f"{int(now.strftime("%M"))-20}")
+            self.common_test_data_config.set("common_data", "end_minute", f"{int(now.strftime("%M"))-20}")
+            self.common_test_data_config.set("common_data", "meta_data_start_minute", f"{int(now.strftime("%M"))-20}")
+            self.common_test_data_config.set("common_data", "meta_data_end_minute", f"{int(now.strftime("%M"))-20}")
+
+            self.common_test_data_config.set("common_data", "start_am_pm_period", f"{now.strftime("%p")}")
+            self.common_test_data_config.set("common_data", "end_am_pm_period", f"{now.strftime("%p")}")
+            self.common_test_data_config.set("common_data", "meta_data_start_am_pm_period", f"{now.strftime("%p")}")
+            self.common_test_data_config.set("common_data", "meta_data_end_am_pm_period", f"{now.strftime("%p")}")
+
+        except Exception as ex:
+            print(ex.args)
+
         # full_dashboard_by_xpath
+# LoginLogout_Read_ini().set_vs_and_vsj_date_time()

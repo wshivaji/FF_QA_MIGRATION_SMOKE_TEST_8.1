@@ -483,6 +483,14 @@ class insight_dashboard_read_ini:
         except Exception as ex:
             print(ex.args)
 
+    def total_new_enrollments(self):
+        try:
+            total_new_enrollments = self.common_test_data_config.get("Insights_Dashboard_Data", "total_new_enrollments")
+            print("total_new_enrollments: ", total_new_enrollments)
+            return total_new_enrollments
+        except Exception as ex:
+            print(ex.args)
+
     def total_enrollments_count_for_selected_eg(self):
         try:
             total_enrollments_count_for_selected_eg = self.common_test_data_config.get("Insights_Dashboard_Data", "total_enrollments_count_for_selected_eg")
