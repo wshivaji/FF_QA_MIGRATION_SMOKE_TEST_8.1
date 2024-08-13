@@ -638,7 +638,7 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
             self.d.execute_script("arguments[0].click();", link)
             self.logger.info(f"clicked on Identify and enroll link")
             time.sleep(web_driver.one_second)
-            file_path = f"{self.ie_file_path}{Read_Identify_and_Enroll_Components().test_sm_tc_159_enrolled_image()}"
+            file_path = f"{Path(__file__).parent.parent.parent}{Read_Identify_and_Enroll_Components().test_sm_tc_159_enrolled_image()}"
             self.upload_image(file_path)
 
             identify_enroll_btn = self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components()
@@ -656,8 +656,8 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
                 count += 1
                 self.logger.info(f"waiting fir wait icon, count: {count}")
 
-            face_icon = self.d.find_element(By.XPATH, Read_Identify_and_Enroll_Components()
-                                            .identify_results_faces_icon_by_xpath())
+            face_icon = self.explicit_wait(5, "XPATH", Read_Identify_and_Enroll_Components().identify_results_faces_icon_by_xpath(), self.d)
+            face_icon = self.d.find_element(By.XPATH, Read_Identify_and_Enroll_Components().identify_results_faces_icon_by_xpath())
             if face_icon.is_displayed():
                 self.logger.info("Face icon is visible...")
                 self.status.append(True)
@@ -1151,6 +1151,7 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
             self.logger.info(f"status: {self.status}")
         except Exception as ex:
             self.logger.info(f"enroll 5 images exception: {ex.args}")
+            self.status.append(False)
 
     def verify_user_able_approve_enrollment(self):
         try:
@@ -1904,7 +1905,7 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
                                       .identify_and_enroll_link_by_xpath(), self.d)
             self.d.execute_script("arguments[0].click();", link)
             self.logger.info(f"clicked on Identify and enroll link")
-            file_path = f"{self.ie_file_path}{Read_Identify_and_Enroll_Components().test_sm_tc_159_enrolled_image()}"
+            file_path = f"{Path(__file__).parent.parent.parent}{Read_Identify_and_Enroll_Components().test_sm_tc_159_enrolled_image()}"
             self.upload_image(file_path)
 
             identify_enroll_btn = self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components()
