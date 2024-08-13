@@ -2461,7 +2461,7 @@ class events_pom(web_driver, web_logger):
             self.click_on_event_menu()
             self.click_on_search_button()
             self.click_on_enrollment_group()
-            eg_name = "ABE"
+            eg_name = "MABE"
             self.select_enrollment_group(eg_name)
             self.click_on_save_button()
             self.click_on_org_hierarchy_selection_btn()

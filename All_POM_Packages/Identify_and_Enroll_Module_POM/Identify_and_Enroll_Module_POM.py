@@ -1698,56 +1698,57 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
 
     def Verify_for_above_25_enrolled_subject_reported_loss_are_properly_assigned(self):
          try:
-            self.logger.info("identify  enroll tc started")
-            login().login_to_cloud_if_not_done(self.d)
-            time.sleep(web_driver.one_second)
+
+             self.logger.info("identify  enroll tc started")
+             login().login_to_cloud_if_not_done(self.d)
+             time.sleep(web_driver.one_second)
 
 
-            Enrollment_details_dict = self.Read_user_from_json()
-            enrollment_link = self.d.find_element(By.XPATH, Read_Identify_and_Enroll_Components().Enrollment_link())
-            enrollment_link.click()
+             Enrollment_details_dict = self.Read_user_from_json()
+             enrollment_link = self.d.find_element(By.XPATH, Read_Identify_and_Enroll_Components().Enrollment_link())
+             enrollment_link.click()
 
-            x = Read_Identify_and_Enroll_Components().read_reported_loss_values_from_ini()
-            enrollment_reported_loss = x.split(',')
-            self.logger.info(f"eg list: {enrollment_reported_loss}")
+             x = Read_Identify_and_Enroll_Components().read_reported_loss_values_from_ini()
+             enrollment_reported_loss = x.split(',')
+             self.logger.info(f"eg list: {enrollment_reported_loss}")
 
-            search_dropdown = self.d.find_element(By.XPATH,Read_Identify_and_Enroll_Components().search_dropdow_on_enrollment())
-            search_dropdown.click()
-            self.logger.info("search dropdown is clicked")
-            time.sleep(web_driver.one_second)
-            read_case_subject_from_ini = Read_Identify_and_Enroll_Components().case_subject_inpt_bx_by_xpath()
-            read_case_sub = read_case_subject_from_ini.split(',')
-            case_subject = self.d.find_element(By.XPATH, Read_Identify_and_Enroll_Components().case_subject_xpath())
-            for i in read_case_subject_from_ini:
-                case_subject.clear()
-                case_subject.send_keys(i)
-                time.sleep(web_driver.one_second)
-                search_button = self.d.find_element(By.XPATH,Read_Identify_and_Enroll_Components().search_button())
-                search_button.click()
-                self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components().list_of_enrollments_by_xpath(),self.d)
-                en_list = self.d.find_elements(By.XPATH,Read_Identify_and_Enroll_Components().list_of_enrollments_by_xpath())
-                for x in range(len(en_list)):
+             search_dropdown = self.d.find_element(By.XPATH,Read_Identify_and_Enroll_Components().search_dropdow_on_enrollment())
+             search_dropdown.click()
+             self.logger.info("search dropdown is clicked")
+             time.sleep(web_driver.one_second)
+             read_case_subject_from_ini = Read_Identify_and_Enroll_Components().case_subject_inpt_bx_by_xpath()
+             read_case_sub = read_case_subject_from_ini.split(',')
+             case_subject = self.d.find_element(By.XPATH, Read_Identify_and_Enroll_Components().case_subject_xpath())
+             for i in read_case_subject_from_ini:
+                 case_subject.clear()
+                 case_subject.send_keys(i)
+                 time.sleep(web_driver.one_second)
+                 search_button = self.d.find_element(By.XPATH,Read_Identify_and_Enroll_Components().search_button())
+                 search_button.click()
+                 self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components().list_of_enrollments_by_xpath(),self.d)
+                 en_list = self.d.find_elements(By.XPATH,Read_Identify_and_Enroll_Components().list_of_enrollments_by_xpath())
+                 for x in range(len(en_list)):
 
-                    tribar_button = self.d.find_elements(By.XPATH,Read_Identify_and_Enroll_Components().select_tribar_button_on_enrollment_panel())
-                    tribar_button[i].click()
-                    self.logger.info("clicking on tribar button")
-                    time.sleep(web_driver.one_second)
-                    details_button = self.d.find_elements(By.XPATH,Read_Identify_and_Enroll_Components().details_button())
-                    details_button[i].click()
-                    self.logger.info("clicking on details button")
-                    time.sleep(web_driver.one_second)
-                    reported_loss = self.d.find_element(By.XPATH,Read_Identify_and_Enroll_Components().reported_loss_value_xpath())
-                    rl=reported_loss.text
-                    if rl == Enrollment_details_dict["Enrollment_details"][x]["case_subject"]:
-                        self.status.append(True)
-                    else:
-                        self.status.append(False)
-                    if False in self.status:
-                         self.logger.error(f"screenshot file path: {self.screenshots_path}\\test_TC_IE_100.png")
-                         self.d.save_screenshot(f"{self.screenshots_path}\\test_TC_IE_100_failed.png")
-                         return False
-                    else:
-                         return True
+                     tribar_button = self.d.find_elements(By.XPATH,Read_Identify_and_Enroll_Components().select_tribar_button_on_enrollment_panel())
+                     tribar_button[i].click()
+                     self.logger.info("clicking on tribar button")
+                     time.sleep(web_driver.one_second)
+                     details_button = self.d.find_elements(By.XPATH,Read_Identify_and_Enroll_Components().details_button())
+                     details_button[i].click()
+                     self.logger.info("clicking on details button")
+                     time.sleep(web_driver.one_second)
+                     reported_loss = self.d.find_element(By.XPATH,Read_Identify_and_Enroll_Components().reported_loss_value_xpath())
+                     rl=reported_loss.text
+                     if rl == Enrollment_details_dict["Enrollment_details"][x]["case_subject"]:
+                         self.status.append(True)
+                     else:
+                         self.status.append(False)
+                     if False in self.status:
+                          self.logger.error(f"screenshot file path: {self.screenshots_path}\\test_TC_IE_100.png")
+                          self.d.save_screenshot(f"{self.screenshots_path}\\test_TC_IE_100_failed.png")
+                          return False
+                     else:
+                          return True
          except Exception as ex:
                      self.logger.error(f"test_TC_IE_100 got an exception as: {ex}")
                      self.d.save_screenshot(
@@ -1768,8 +1769,10 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
             self.d.execute_script("arguments[0].click();", link)
             self.logger.info(f"clicked on Identify and enroll link")
             time.sleep(web_driver.two_second)
-            img_path = f"{Path(__file__).parent.parent.parent}\\All_Test_Data\\Common_Test_Data\\dataset2\\img3.png"
-            self.upload_image_not_enrolled(img_path)
+            img_path = f"{Path(__file__).parent.parent.parent}{Read_Identify_and_Enroll_Components().test_sm_tc_158_unenrolled_image()}"
+            self.logger.info(f"img path: {img_path}")
+            self.upload_image(img_path)
+            # self.upload_image_not_enrolled(img_path)
             self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components()
                                .identify_enroll_panel_identify_enroll_btn_by_xpath(), self.d)
             identify_enroll_btn = self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components()
@@ -1978,7 +1981,8 @@ class Identify_And_Enroll_POM(web_driver, web_logger):
             self.logger.info(f"clicked on Identify and enroll link")
             time.sleep(web_driver.two_second)
             img_path = f"{Path(__file__).parent.parent.parent}\\All_Test_Data\\Common_Test_Data\\dataset2\\img4.png"
-            self.upload_image_not_enrolled(img_path)
+            self.upload_image(img_path)
+            # self.upload_image_not_enrolled(img_path)
             self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components()
                                .identify_enroll_panel_identify_enroll_btn_by_xpath(), self.d)
             identify_enroll_btn = self.explicit_wait(10, "XPATH", Read_Identify_and_Enroll_Components()

@@ -2754,3 +2754,10 @@ class Read_Identify_and_Enroll_Components:
             return test_sm_tc_159_enrolled_image
         except Exception as ex:
             print("crop_photo_btn_below_text : ", ex)
+
+    def test_sm_tc_158_unenrolled_image(self):
+        try:
+            test_sm_tc_158_unenrolled_image = self.common_test_data_config.get("common_data", "test_sm_tc_158_unenrolled_image")
+            return test_sm_tc_158_unenrolled_image
+        except Exception as ex:
+            print("crop_photo_btn_below_text : ", ex)

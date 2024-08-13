@@ -368,7 +368,7 @@ class Users_Module_pom(web_driver, web_logger):
             region = Read_Users_Components().region_data_input()
             self.select_region(region)
 
-            email = Read_Users_Components().email_input_data()
+            email = f"{username}{Read_Users_Components().email_input_data()}"
             self.enter_email(email)
 
             time_zone = Read_Users_Components().time_zone_input_data()
@@ -630,7 +630,7 @@ class Users_Module_pom(web_driver, web_logger):
             region = Read_Users_Components().region_data_input()
             self.select_region(region)
 
-            email = Read_Users_Components().email_input_data()
+            email = f"{username}{Read_Users_Components().email_input_data()}"
             self.enter_email(email)
 
             time_zone = Read_Users_Components().time_zone_input_data()
@@ -684,7 +684,7 @@ class Users_Module_pom(web_driver, web_logger):
             region = Read_Users_Components().region_data_input()
             self.select_region(region)
 
-            email = Read_Users_Components().email_input_data()
+            email = f"{username}{Read_Users_Components().email_input_data()}"
             self.enter_email(email)
 
             time_zone = Read_Users_Components().time_zone_input_data()
@@ -702,6 +702,7 @@ class Users_Module_pom(web_driver, web_logger):
                 return False
 
         except Exception as ex:
+
             self.d.save_screenshot(f"{self.screenshots_path}test_TC_US_02_exception.png")
             self.log.info(f"test_TC_US_115_exception: {ex}")
             return False
@@ -951,7 +952,7 @@ class Users_Module_pom(web_driver, web_logger):
             region = Read_Users_Components().region_data_input()
             self.select_region(region)
 
-            email = Read_Users_Components().email_input_data()
+            email = f"{username}{Read_Users_Components().email_input_data()}"
             self.enter_email(email)
 
             time_zone = Read_Users_Components().time_zone_input_data()
@@ -1004,7 +1005,7 @@ class Users_Module_pom(web_driver, web_logger):
             region = Read_Users_Components().region_data_input()
             self.select_region(region)
 
-            email = Read_Users_Components().email_input_data()
+            email = f"{username}{Read_Users_Components().email_input_data()}"
             self.enter_email(email)
 
             time_zone = Read_Users_Components().time_zone_input_data()
@@ -1055,7 +1056,7 @@ class Users_Module_pom(web_driver, web_logger):
             region = Read_Users_Components().region_data_input()
             self.select_region(region)
 
-            email = Read_Users_Components().email_input_data()
+            email = f"{username}{Read_Users_Components().email_input_data()}"
             self.enter_email(email)
 
             time_zone = Read_Users_Components().time_zone_input_data()
@@ -1108,7 +1109,7 @@ class Users_Module_pom(web_driver, web_logger):
             region = Read_Users_Components().region_data_input()
             self.select_region(region)
 
-            email = Read_Users_Components().email_input_data()
+            email = f"{username}{Read_Users_Components().email_input_data()}"
             self.enter_email(email)
 
             time_zone = Read_Users_Components().time_zone_input_data()
@@ -2224,7 +2225,7 @@ class Users_Module_pom(web_driver, web_logger):
         region = Read_Users_Components().region_data_input()
         self.select_region(region)
 
-        email = Read_Users_Components().email_input_data()
+        email = f"{username}{Read_Users_Components().email_input_data()}"
         self.enter_email(email)
 
         time_zone = Read_Users_Components().time_zone_input_data()
@@ -2673,7 +2674,7 @@ class Users_Module_pom(web_driver, web_logger):
             region = Read_Users_Components().region_data_input()
             self.select_region(region)
 
-            email = Read_Users_Components().email_input_data()
+            email = f"{username}{Read_Users_Components().email_input_data()}"
             self.enter_email(email)
 
             time_zone = Read_Users_Components().time_zone_input_data()
@@ -3290,7 +3291,7 @@ class Users_Module_pom(web_driver, web_logger):
             region = Read_Users_Components().region_data_input()
             self.select_region(region)
 
-            email = Read_Users_Components().email_input_data()
+            email = f"{username}{Read_Users_Components().email_input_data()}"
             self.enter_email(email)
 
             time_zone = Read_Users_Components().time_zone_input_data()
@@ -3411,7 +3412,7 @@ class Users_Module_pom(web_driver, web_logger):
             email = self.explicit_wait(10, "XPATH", Read_Users_Components().user_details_email_by_xpath(), self.d)
             self.logger.info(f"email is {email.text}")
             time.sleep(web_driver.one_second)
-            email1 = users_dict["users"][0]["Email"]
+            email1 = f"{username}{Read_Users_Components().email_input_data()}"
             self.logger.info(f"expected email: {email1}")
             time_Zone = self.explicit_wait(10, "XPATH", Read_Users_Components().user_details_timezone_by_xpath(),
                                            self.d)
