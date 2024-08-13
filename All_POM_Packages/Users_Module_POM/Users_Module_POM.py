@@ -3412,7 +3412,7 @@ class Users_Module_pom(web_driver, web_logger):
             email = self.explicit_wait(10, "XPATH", Read_Users_Components().user_details_email_by_xpath(), self.d)
             self.logger.info(f"email is {email.text}")
             time.sleep(web_driver.one_second)
-            email1 = f"{username}{Read_Users_Components().email_input_data()}"
+            email1 = Read_Users_Components().core_email()
             self.logger.info(f"expected email: {email1}")
             time_Zone = self.explicit_wait(10, "XPATH", Read_Users_Components().user_details_timezone_by_xpath(),
                                            self.d)

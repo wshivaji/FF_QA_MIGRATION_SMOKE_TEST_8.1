@@ -2035,3 +2035,10 @@ class Read_Users_Components:
             return name
         except Exception as ex:
             print(ex.args)
+
+    def core_email(self):
+        try:
+            core_email = self.common_test_data_config.get("Login_Logout_Data", "email")
+            return core_email
+        except Exception as ex:
+            print("crop_photo_btn_below_text : ", ex)

@@ -2761,3 +2761,10 @@ class Read_Identify_and_Enroll_Components:
             return test_sm_tc_158_unenrolled_image
         except Exception as ex:
             print("crop_photo_btn_below_text : ", ex)
+
+    def core_email(self):
+        try:
+            core_email = self.common_test_data_config.get("Login_Logout_Data", "email")
+            return core_email
+        except Exception as ex:
+            print("crop_photo_btn_below_text : ", ex)
